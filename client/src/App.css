@@ -7,6 +7,21 @@
   pointer-events: none;
 }
 
+.centered {
+  text-align: center;
+  color: #8F0000;
+  font-family: 'Lato';
+  padding-top: 2%;
+
+}
+
+.icon-block {
+  display: flex;
+}
+.icon {
+  margin-left: auto;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;

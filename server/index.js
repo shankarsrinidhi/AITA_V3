@@ -24,7 +24,16 @@ app.post("/todos", async(req,res)=>{
 });
 
 //get routes 
+app.get("/teamName", async(req,res)=>{
+    try {
+        //const { id } = req.params;
+        const teamName =  await pool.query("SELECT team_name FROM Team WHERE team_id = 1");
+        res.json(teamName.rows[0]);
 
+    } catch (err) {
+        console.error(err.message);
+    }
+});
 //all todos
 app.get("/todos", async(req,res)=>{
     try {
