@@ -54,7 +54,7 @@ function Header() {
         <div class="float-right"><FaBars style={{color: '#8f0000', fontSize: '50px', padding: '7.5px', marginTop:'25px'}} className="btn"/></div><br></br>
         </div>
         <div>
-      <h2 className="centered">{teamName.team_name}</h2>
+      <h4 className="centered">{teamName.team_name}</h4>
       </div>
     </header>
   );
