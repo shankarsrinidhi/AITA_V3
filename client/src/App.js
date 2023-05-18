@@ -23,12 +23,12 @@ function App() {
       <div className="container">
       <Header/>
       <Routes>
-          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/weeklyReport" element={<WeeklyReport />} />
           <Route path="/MOKR" element={<MOKR />} />
         </Routes>
-        <InputTodo />
-        <ListTodos />
+        
+        
         
       </div>
       <div>

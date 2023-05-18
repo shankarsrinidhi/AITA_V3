@@ -24,7 +24,7 @@ const Footer = () => {
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         
             <nav class="nav">
-            <CustomLink to="home">
+            <CustomLink to="/">
                 <i class="material-icons nav__icon">home</i>
                 <span class="nav__text">Dashboard</span>
             </CustomLink>
