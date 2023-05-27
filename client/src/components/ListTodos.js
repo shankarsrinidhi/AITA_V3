@@ -1,16 +1,29 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
-import { MdOutlineModeEditOutline } from "react-icons/md"; 
 import { AiOutlineDelete } from "react-icons/ai";
 import EditObjective from "./EditObjective";
+import AddKR from "./AddKR";
+
+//import DeleteObjective from "./DeleteObjective";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+
 //import AddObjective from "./AddObjective";
 
 import EditTodo from "./EditTodo";
+import DeleteObjective from "./DeleteObjective";
+import EditKR from "./EditKR";
+import DeleteKR from "./DeleteKR";
 
 const ListTodos = () => {
   const [todos, setTodos] = useState([]);
   const [objectives, setObjectives] = useState([]);
   const [krShown, setKrShown] = useState([]);
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   //delete todo function
 
@@ -21,6 +34,19 @@ const ListTodos = () => {
       });
 
       setTodos(todos.filter(todo => todo.todo_id !== id));
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const deleteObjective = async objective_id => {
+    try {
+      const deleteObjective = await fetch(`http://localhost:5000/1/objectives/${objective_id}`, {
+        method: "DELETE"
+      });
+
+      updateData();
+      handleClose();
     } catch (err) {
       console.error(err.message);
     }
@@ -61,6 +87,19 @@ const ListTodos = () => {
   }, []);
   console.log(objectives);
 
+
+  const updateData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/1/objectives/check");
+      const jsonData = await response.json();
+      
+
+      setObjectives(jsonData);
+    } catch (error) {
+      console.error('Error fetching updated data:', error);
+    }
+  };
+
   const toggleShown = objective_id => {
     const shownState = krShown.slice();
     const index = shownState.indexOf(objective_id);
@@ -78,7 +117,7 @@ const ListTodos = () => {
 
   return (
     <Fragment>
-      {" "}
+      
 
 
       <table class="table mt-3">
@@ -100,16 +139,12 @@ const ListTodos = () => {
               </td>
               <td>{objective.objective.objective_title}</td>
               <td className ="expand">
-                {/*<button className="btn3 float-right">
-                  <MdOutlineModeEditOutline style={{fontSize:'1.25rem'}}></MdOutlineModeEditOutline>
-          </button>*/}
-                <EditObjective objective={objective}></EditObjective>
+                <EditObjective objective={objective} updateData = {updateData} ></EditObjective>
               </td>
               <td className ="expand">
-                <button className="btn3 float-right">
-                  <AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete>
-                </button>
+                <DeleteObjective objective={objective} updateData = {updateData} ></DeleteObjective>
               </td>
+              
               {/*<td>
                 <EditTodo todo={todo} />
               </td>
@@ -132,7 +167,8 @@ const ListTodos = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <h5 style={{color:"#8f0000", marginTop:"1.5rem"}}>Key Results</h5>
-                      <button className="btn btn1" style={{ float: 'right', marginTop:"1.5rem" }}>Add KR</button>
+                      
+                      <AddKR updateData={updateData} objective = {objective}></AddKR>
                     </div>
                     
                     <table className="table mt-3">
@@ -142,18 +178,17 @@ const ListTodos = () => {
                             
                             <tr key={kr.kr_id}>
                               {kr.kr_id? (<>
-                                  <td>{index+1}</td>
+                                
+                                  <td className = "expand">{index+1}</td>
                                   <td style={{paddingLeft:"2rem"}}>{kr.key_result}</td>
-                                  <td>
-                                    <button className="btn3 float-right">
-                                      <MdOutlineModeEditOutline style={{fontSize:'1.25rem'}}></MdOutlineModeEditOutline>
-                                    </button>
+                                  
+                                  <td className = "expand">
+                                    <EditKR objective={objective} kr={kr} updateData={updateData}></EditKR>
                                   </td>
-                                  <td>
-                                    <button className="btn3 float-right">
-                                      <AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete>
-                                    </button>
+                                  <td className = "expand">
+                                    <DeleteKR objective={objective} kr={kr} updateData={updateData}></DeleteKR>
                                   </td>
+                                  
                               </>):(
                                   <td colSpan="3">
                                     <h6 style={{ marginLeft:"1.5rem"}}>No Key Results added</h6>
@@ -172,7 +207,19 @@ const ListTodos = () => {
                 </tr>)
               }
 
+      
+
+
+
+
+                
+
+
+
+                
             </Fragment>
+
+
             
             
 
