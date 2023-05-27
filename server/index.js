@@ -36,6 +36,20 @@ app.post("/:project_id/objectives", async(req,res)=>{
     }
 });
 
+//post new Key result
+app.post("/objectives/:objective_id/kr", async(req,res)=>{
+    try {
+        console.log(req.body);
+        //const { project_id } = req.params;
+        const { objective_id } = req.params;
+        const { description } = req.body;
+        const newKR = await pool.query("INSERT INTO keyresult(key_result, objective_id) VALUES($1,$2) RETURNING *",[description,objective_id]);
+        res.json(newKR.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
 
 
 //Get routes 
@@ -127,6 +141,57 @@ app.get("/:project_id/mission", async(req,res)=>{
 });
 
 
+
+app.get("/:project_id/report/:report_id/progress", async(req,res)=>{
+    try {
+        console.log("calling progress on load");
+        const { project_id } = req.params;
+        const { report_id } = req.params;
+        
+        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.report_id, p.objective_id, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.report_id = $1",[report_id]);
+        res.json(prog.rows);
+        console.log(prog.rows[0]);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
+app.get("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
+    try {
+        console.log("calling progress on load");
+        const { project_id } = req.params;
+        const { start_date } = req.params;
+        const { end_date } = req.params;
+       
+        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.objective_id, p.assumption, p.completed_on, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2",[start_date,end_date]);
+        res.json(prog.rows);
+        console.log(prog.rows[0]);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+app.get("/:project_id/report/:start_date/:end_date/completedplans", async(req,res)=>{
+    try {
+        console.log("calling completed plans on load");
+        const { project_id } = req.params;
+        const { start_date } = req.params;
+        const { end_date } = req.params; 
+       
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.objective_id, p.assumption, p.completed_on, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = true ",[start_date,end_date]);
+        res.json(prog.rows);
+        console.log(prog.rows[0]);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
+
 //put routes
 app.put("/todos/:id", async(req,res)=>{
     try {
@@ -170,10 +235,27 @@ app.put("/:project_id/objectives/:objective_id", async(req,res)=>{
 });
 
 
+//update key result row on click of the edit pencil icon
+
+app.put("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
+    try {
+        console.log(req.body);
+        const { kr_id } = req.params;
+        const { objective_id } = req.params;
+        const { description } = req.body;
+        const editKR = await pool.query("UPDATE keyresult SET key_result = ($1) WHERE kr_id = ($2) AND objective_id = ($3)",[description,kr_id,objective_id]);
+        res.json(editKR.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
 
 //delete routes
 app.delete("/todos/:id", async(req,res)=>{
     try {
+        
         const { id } = req.params;
         const deleteTodo = await pool.query("DELETE FROM todo WHERE todo_id = $1",[id]);
         res.json("Deleted");
@@ -181,7 +263,39 @@ app.delete("/todos/:id", async(req,res)=>{
     } catch (err) {
         console.error(err.message);
     }
+});
+
+app.delete("/:project_id/objectives/:objective_id", async(req,res)=>{
+    try {
+        console.log("checking delete objective ");
+        const { project_id } = req.params;
+        const { objective_id } = req.params;
+        console.log("objective id is "+ objective_id);
+        const deleteKR = await pool.query("DELETE from keyresult WHERE objective_id = $1",[objective_id]);
+        const deleteObjective = await pool.query("DELETE FROM objective WHERE objective_id = $1 AND project_id = $2",[objective_id,project_id]);
+        res.json("Deleted");
+        
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
+app.delete("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
+    try {
+        console.log("checking delete KR ");
+        const { kr_id } = req.params;
+        const { objective_id } = req.params;
+        console.log("objective id is "+ objective_id);
+        const deleteKR = await pool.query("DELETE from keyresult WHERE objective_id = $1 AND kr_id = $2",[objective_id,kr_id]);
+        
+        res.json("Deleted");
+        
+    } catch (err) {
+        console.error(err.message);
+    }
 })
+
 
 app.listen(5000, ()=>{
     console.log("Server has started ");

@@ -2,50 +2,53 @@ import React, { Fragment, useState } from "react";
 import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { MdOutlineModeEditOutline } from "react-icons/md";
 
-const EditObjective = ({ objective , updateData }) => {
-  console.log("in edit objective "+objective.objective.objective_id);
-  const [description, setDescription] = useState(objective.objective.description);
-  const [title, setTitle] = useState(objective.objective.objective_title);
-  //const [isEmpty, setIsEmpty] = useState(true);
+const AddKR = ({ updateData , objective }) => {
+
+  const [description, setDescription] = useState("");
   const [show, setShow] = useState(false);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {setShow(false);
+    setDescription("")};
   const handleShow = () => setShow(true);
+
 
   //edit description function
 
-
-
-
-  const updateObjective = async e => {
+  const addKR = async e => {
     e.preventDefault();
     try {
-      console.log("checking to see if edit is called everytime "+objective.objective.objective_id)
-      const body = { title, description };
+        console.log("objective_id "+objective.objective.objective_id);
+      const body = { description };
       const response = await fetch(
-        `http://localhost:5000/1/objectives/${objective.objective.objective_id}`,
+        `http://localhost:5000/objectives/${objective.objective.objective_id}/kr`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      await updateData();
+      updateData();
       handleClose();
       
+
+      //window.location = "/MOKR";
     } catch (err) {
       console.error(err.message);
     }
   };
+//34 - data-target={`#id${id}`}  44 - id={`id${id+1}`}
 
   return (
     <Fragment>
-        <button className="btn3 float-right" onClick={handleShow}
-         >
-            <MdOutlineModeEditOutline style={{fontSize:'1.25rem'}}></MdOutlineModeEditOutline>
-        </button>
+      <button
+        type="button"
+        class="btn btn1 float-right"
+        onClick={handleShow}
+        style={{ float: 'right', marginTop:"1.5rem" }}
+      >
+        Add KR
+      </button>
 
         <Modal
         show={show}
@@ -53,13 +56,13 @@ const EditObjective = ({ objective , updateData }) => {
         backdrop="static"
         keyboard={false}
       >
-        <form onSubmit={updateObjective}>
+        <form onSubmit={addKR}>
         <Modal.Header closeButton>
-          <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Edit Objective</Modal.Title>
+          <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Add New Key Result</Modal.Title>
         </Modal.Header>
         <Modal.Body>
         
-          <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Title</h5>
+          {/*<h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Key Result</h5>
                 <input
                 required 
                   type="text"
@@ -67,8 +70,8 @@ const EditObjective = ({ objective , updateData }) => {
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                 />
-                <br></br>
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description</h5>
+                <br></br>*/}
+                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Key Result</h5>
                 <TextField
                   multiline
                   required
@@ -90,23 +93,19 @@ const EditObjective = ({ objective , updateData }) => {
         </form>
       </Modal>
 
-
-
       {/* 
         id = id10
-         onClick={() => {setDescription(objective.objective.description);
-                        setTitle(objective.objective.objective_title)}}
-      */}
-     {/*} <div
+      
+      <div
         class="modal"
-        id={`id${objective.objective.objective_id}`}
-       
+        id="exampleModalCenter1"
+        
       >
         <div class="modal-dialog">
           <div class="modal-content">
-            <form onSubmit={updateObjective}>
+            <form onSubmit={addKR}>
             <div class="modal-header">
-              <h4 class="modal-title" style={{color:'#8F0000', fontFamily: 'Lato'}}>Edit Objective</h4>
+              <h4 class="modal-title" style={{color:'#8F0000', fontFamily: 'Lato'}}>Add Key Result</h4>
               <button
                 type="button"
                 class="close"
@@ -144,8 +143,7 @@ const EditObjective = ({ objective , updateData }) => {
               <button
                 type="submit"
                 class="btn btn1"
-                data-dismiss={{description} && {title} ? "" : "modal"}
-                onClick={updateObjective}
+                data-dismiss= {{description} && {title} ? "" : "modal"}
                 
               >
                 Save
@@ -154,8 +152,7 @@ const EditObjective = ({ objective , updateData }) => {
                 type="button"
                 class="btn btn-danger"
                 data-dismiss="modal"
-                onClick={() => {setDescription(objective.objective.description);
-                                setTitle(objective.objective.objective_title)}}
+                onClick={() => {setDescription(""); setTitle("")}}
               >
                 Close
               </button>
@@ -168,4 +165,4 @@ const EditObjective = ({ objective , updateData }) => {
   );
 };
 
-export default EditObjective;
+export default AddKR;
