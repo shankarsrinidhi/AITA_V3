@@ -9,23 +9,47 @@
   import Progress from "../Progress";
 import DraggableCardList from "../DraggableCardList";
 import CompletedPlannedTasks from "../CompletedPlannedTasks";
+import UncompletedPlannedTasks from "../UncompletedPlannedTasks";
+import AdditionalCompletedTasks from "../AdditionalCompletedTasks";
+import AddProgressRow from "../AddProgressRow";
+import PlansList from "../PlansList";
+import AddPlan from "../AddPlan";
+import ProblemsList from "../ProblemsList";
+import AddProblem from "../AddProblem";
   
   
   
 
   function WeeklyReport() {
     const [currentDate, setCurrentDate] = useState(new Date("Mon Jan 31 2022 05:30:00 GMT+0530 (India Standard Time)"));
-    const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
-    const [currentWeekEnd, setCurrentWeekEnd] = useState(new Date());
+    const [completedTasksRefreshCount, setCompletedTasksRefreshCount] = useState(0);
+    const [uncompletedTasksRefreshCount, setUncompletedTasksRefreshCount] = useState(0);
+    const [additionalTasksRefreshCount, setAdditionalTasksRefreshCount] = useState(0);
+    const [plansRefreshCount,setPlansRefreshCount] = useState(0);
+    const [problemsRefreshCount,setProblemsRefreshCount] = useState(0);
 
-    const [refreshCount, setRefreshCount] = useState(0);
 
-    const handleRefresh = () => {
-      // Increment the refresh count to trigger a refresh
-      setRefreshCount(refreshCount + 1);
+    const refreshCompletedTasks = () => {
+      setCompletedTasksRefreshCount(completedTasksRefreshCount + 1);
+    };
+  
+    // Function to trigger refresh of UncompletedPlannedTasks
+    const refreshUncompletedTasks = () => {
+      setUncompletedTasksRefreshCount(uncompletedTasksRefreshCount + 1);
     };
 
-    const [languages, setLanguages ] = useState(["JavaScript", "Python", "TypeScript"]);
+    //refreshAdditionalCompletedTasks
+    const refreshAdditionalCompletedTasks = () => {
+      setAdditionalTasksRefreshCount(additionalTasksRefreshCount + 1);
+    };
+//refreshPlans
+    const refreshPlans = () => {
+      setPlansRefreshCount(plansRefreshCount + 1);
+    };
+
+    const refreshProblems = () => {
+      setProblemsRefreshCount(problemsRefreshCount + 1);
+    };
 
     const formatDate = (dateString) => {
       const date = new Date(dateString);
@@ -45,16 +69,22 @@ import CompletedPlannedTasks from "../CompletedPlannedTasks";
       const previousWeek = new Date(currentDate);
       previousWeek.setDate(currentDate.getDate() - 7);
       setCurrentDate(previousWeek);
-      setRefreshCount(refreshCount + 1);
+      setCompletedTasksRefreshCount(completedTasksRefreshCount + 1);
+      setUncompletedTasksRefreshCount(uncompletedTasksRefreshCount + 1);
+      setAdditionalTasksRefreshCount(additionalTasksRefreshCount+1);
+      setPlansRefreshCount(plansRefreshCount+1);
+      setProblemsRefreshCount(problemsRefreshCount + 1);
     };
   
     const handleNextWeek = () => {
       const nextWeek = new Date(currentDate);
       nextWeek.setDate(currentDate.getDate() + 7);
       setCurrentDate(nextWeek);
-      setRefreshCount(refreshCount + 1);
-
-      console.log("date "+currentDate, " formatted date "+formatDate(currentDate));
+      setCompletedTasksRefreshCount(completedTasksRefreshCount + 1);
+      setUncompletedTasksRefreshCount(uncompletedTasksRefreshCount + 1);
+      setAdditionalTasksRefreshCount(additionalTasksRefreshCount+1);
+      setPlansRefreshCount(plansRefreshCount+1);
+      setProblemsRefreshCount(problemsRefreshCount + 1);
     };
     
     const getWeekStartDate = () => {
@@ -79,7 +109,7 @@ import CompletedPlannedTasks from "../CompletedPlannedTasks";
       const date = getWeekStartDate();
       date.setDate(date.getDate() - 7);
       //setCurrentWeekEnd(new Date(date.setDate(diff)));
-      console.log("formatted weekend "+formatDate(date));
+      //console.log("formatted weekend "+formatDate(date));
       return date;
     };
 
@@ -87,7 +117,7 @@ import CompletedPlannedTasks from "../CompletedPlannedTasks";
       const date = getWeekEndDate();
       date.setDate(date.getDate() - 7);
       //setCurrentWeekEnd(new Date(date.setDate(diff)));
-      console.log("formatted weekend "+formatDate(date));
+      //console.log("formatted weekend "+formatDate(date));
       return date;
     };
 
@@ -118,16 +148,34 @@ import CompletedPlannedTasks from "../CompletedPlannedTasks";
 
         <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Progress</h4>
         <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-        <h6 style={{color:"#8f0000", marginBottom:"1.5rem"}}>Completed Planned Tasks</h6>
+        <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Completed Planned Tasks</h6>
 
-          <CompletedPlannedTasks key={refreshCount} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
+          <CompletedPlannedTasks key={`CP${completedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
           
-          <h6 style={{color:"#8f0000", marginBottom:"1.5rem"}}>Uncompleted Planned Tasks</h6>
-
-          <h6 style={{color:"#8f0000", marginBottom:"1.5rem"}}>Additional Tasks Completed</h6>
-
+          <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Uncompleted Planned Tasks</h6>
+          <UncompletedPlannedTasks key={`UP${uncompletedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} refreshProblems = {refreshProblems} prevweek_start = {formatDate(prevWeekStartDate())} prevweek_end = {formatDate(prevWeekEndDate())} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></UncompletedPlannedTasks>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Additional Tasks Completed</h6>
+          <AddProgressRow refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AddProgressRow>
+          </div>
+          <AdditionalCompletedTasks key={`AP${additionalTasksRefreshCount}`} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AdditionalCompletedTasks>
         </div>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plans</h4>
+          <AddPlan refreshPlans={refreshPlans} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddPlan>
+        </div>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <PlansList key={`PL${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>
 
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Problems</h4>
+          <AddProblem refreshProblems={refreshProblems} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddProblem>
+        </div>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <ProblemsList key={`PR${problemsRefreshCount}`} refreshProblems={refreshProblems} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></ProblemsList>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
         <form onSubmit={handleSubmit}>
           {/* Form fields */}
           <button type="submit">Submit</button>

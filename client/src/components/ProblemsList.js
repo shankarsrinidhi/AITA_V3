@@ -1,37 +1,38 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import {RxDragHandleDots2} from "react-icons/rx";
-import {FaExclamation} from "react-icons/fa";
+
 import {AiOutlineDelete} from "react-icons/ai";
-import {AiFillCheckCircle} from "react-icons/ai";
+
 
 import './css_components/DraggableCardList.css';
-import EditProgress from "./EditProgress";
+import EditProblem from "./EditProblem";
 
 
-function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
-    //console.log("week start in completed tasks "+week_start+" week end "+week_end);
-  const [progress, setProgress] = useState([]);
 
-  const getProgress = async () => {
+function ProblemsList({refreshProblems, week_start, week_end}) {
+    
+  const [problems, setProblems] = useState([]);
+
+  const getProblems = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/completedplans`);
+      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/problems`);
       const jsonData = await response.json();
       
 
-      setProgress(jsonData);
+      setProblems(jsonData);
     } catch (err) {
       console.error(err.message);
     }
   };
 
   useEffect(() => {
-    getProgress();
+    getProblems();
   }, []);
-  //console.log(progress);
+  //console.log(plans);
 
 
-  const updateData = async () => {
+  /*const updateData = async () => {
     try {
       const response = await fetch("http://localhost:5000/1/report/2/progress");
       const jsonData = await response.json();
@@ -41,24 +42,25 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
-  };
+  };*/
 
-  const markUncomplete = async ({plan}) =>{
+
+  ///:project_id/report/progress/:progress_id
+  const deleteProblem = async ({problem}) =>{
    // e.preventDefault();
     try {
-      const plan_title = plan.plan_title
-      const body = { plan_title };
+      const problem_id= problem.problem_id;
       const response = await fetch(
         
-        `http://localhost:5000/1/progress/markasincomplete/${plan.plan_id}`,
+        `http://localhost:5000/1/report/problem/${problem_id}`,
         {
-          method: "PUT",
+          method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
+          
         }
       );
-      refreshCompletedTasks();
-      refreshUncompletedTasks();
+      refreshProblems();
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
@@ -69,24 +71,24 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
   function handleOnDragEnd(result) {
     if (!result.destination) return;
 
-    const items = Array.from(progress);
+    const items = Array.from(problems);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setProgress(items);
+    setProblems(items);
   }
 
   return (
     <div>
      
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="progress">
+          <Droppable droppableId="problems">
             {(provided) => (
               <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
-                {progress.length > 0 ?(<>
-                {progress.map((plan, index) => {
+                {problems.length > 0 ?(<>
+                {problems.map((problem, index) => {
                   return (
-                    <Draggable key={`compplanid${plan.plan_id}`} draggableId={`compplanid${plan.plan_id}`} index={index}>
+                    <Draggable key={`problemid${problem.problem_id}`} draggableId={`problemid${problem.problem_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
@@ -94,9 +96,9 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
                           
                           
-                          <EditProgress plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
+                            <EditProblem refreshProblems={refreshProblems} problem={problem}></EditProblem>
                           
-                          <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
+                          <button className = "btn3 float-right" onClick={() => deleteProblem({problem})}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
@@ -123,4 +125,4 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
 
 
 
-export default CompletedPlannedTasks;
+export default ProblemsList;
