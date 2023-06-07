@@ -93,74 +93,7 @@ const AddKR = ({ updateData , objective }) => {
         </form>
       </Modal>
 
-      {/* 
-        id = id10
       
-      <div
-        class="modal"
-        id="exampleModalCenter1"
-        
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <form onSubmit={addKR}>
-            <div class="modal-header">
-              <h4 class="modal-title" style={{color:'#8F0000', fontFamily: 'Lato'}}>Add Key Result</h4>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                
-              >
-                &times;
-              </button>
-            </div>
-
-            <div class="modal-body">
-            
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Title</h5>
-              <input
-              required 
-                type="text"
-                className="form-control"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-              />
-              <br></br>
-              <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description</h5>
-              <TextField
-                multiline
-                required
-                rows={4}
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                style ={{width:'100%'}}
-                />
-                
-            </div>
-
-            <div class="modal-footer">
-              <button
-                type="submit"
-                class="btn btn1"
-                data-dismiss= {{description} && {title} ? "" : "modal"}
-                
-              >
-                Save
-              </button>
-              <button
-                type="button"
-                class="btn btn-danger"
-                data-dismiss="modal"
-                onClick={() => {setDescription(""); setTitle("")}}
-              >
-                Close
-              </button>
-            </div>
-            </form>
-          </div>
-        </div>
-      </div>*/}
     </Fragment>
   );
 };

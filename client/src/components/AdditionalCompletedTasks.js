@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import {RxDragHandleDots2} from "react-icons/rx";
-import {FaExclamation} from "react-icons/fa";
+
 import {AiOutlineDelete} from "react-icons/ai";
-import {AiFillCheckCircle} from "react-icons/ai";
+
 
 import './css_components/DraggableCardList.css';
-import EditProgress from "./EditProgress";
+import EditNewAddedProgress from "./EditNewAddedProgress";
 
 
-function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
-    //console.log("week start in completed tasks "+week_start+" week end "+week_end);
+function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, week_end}) {
+    
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/completedplans`);
+      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/additionalprogress`);
       const jsonData = await response.json();
       
 
@@ -43,22 +43,23 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
     }
   };
 
-  const markUncomplete = async ({plan}) =>{
+
+  ///:project_id/report/progress/:progress_id
+  const deleteProg = async ({progress}) =>{
    // e.preventDefault();
     try {
-      const plan_title = plan.plan_title
-      const body = { plan_title };
+      const progress_id= progress.progress_id;
       const response = await fetch(
         
-        `http://localhost:5000/1/progress/markasincomplete/${plan.plan_id}`,
+        `http://localhost:5000/1/report/progress/${progress_id}`,
         {
-          method: "PUT",
+          method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
+          
         }
       );
-      refreshCompletedTasks();
-      refreshUncompletedTasks();
+      refreshAdditionalCompletedTasks();
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
@@ -84,9 +85,9 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
             {(provided) => (
               <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
                 {progress.length > 0 ?(<>
-                {progress.map((plan, index) => {
+                {progress.map((progress, index) => {
                   return (
-                    <Draggable key={`compplanid${plan.plan_id}`} draggableId={`compplanid${plan.plan_id}`} index={index}>
+                    <Draggable key={`addprogid${progress.progress_id}`} draggableId={`addprogid${progress.progress_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
@@ -94,9 +95,9 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
                           
                           
-                          <EditProgress plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
+                          <EditNewAddedProgress refreshAdditionalCompletedTasks={refreshAdditionalCompletedTasks} progress={progress}></EditNewAddedProgress>
                           
-                          <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
+                          <button className = "btn3 float-right" onClick={() => deleteProg({progress})}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
@@ -123,4 +124,4 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
 
 
 
-export default CompletedPlannedTasks;
+export default AdditionalCompletedTasks;

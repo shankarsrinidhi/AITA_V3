@@ -1,37 +1,38 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import {RxDragHandleDots2} from "react-icons/rx";
-import {FaExclamation} from "react-icons/fa";
+
 import {AiOutlineDelete} from "react-icons/ai";
-import {AiFillCheckCircle} from "react-icons/ai";
+
 
 import './css_components/DraggableCardList.css';
-import EditProgress from "./EditProgress";
+import EditPlans from "./EditPlans";
 
 
-function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
-    //console.log("week start in completed tasks "+week_start+" week end "+week_end);
-  const [progress, setProgress] = useState([]);
 
-  const getProgress = async () => {
+function PlansList({refreshPlans, week_start, week_end}) {
+    
+  const [plans, setPlans] = useState([]);
+
+  const getPlans = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/completedplans`);
+      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/plans`);
       const jsonData = await response.json();
       
 
-      setProgress(jsonData);
+      setPlans(jsonData);
     } catch (err) {
       console.error(err.message);
     }
   };
 
   useEffect(() => {
-    getProgress();
+    getPlans();
   }, []);
-  //console.log(progress);
+  //console.log(plans);
 
 
-  const updateData = async () => {
+  /*const updateData = async () => {
     try {
       const response = await fetch("http://localhost:5000/1/report/2/progress");
       const jsonData = await response.json();
@@ -41,24 +42,25 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
-  };
+  };*/
 
-  const markUncomplete = async ({plan}) =>{
+
+  ///:project_id/report/progress/:progress_id
+  const deletePlan = async ({plan}) =>{
    // e.preventDefault();
     try {
-      const plan_title = plan.plan_title
-      const body = { plan_title };
+      const plan_id= plan.plan_id;
       const response = await fetch(
         
-        `http://localhost:5000/1/progress/markasincomplete/${plan.plan_id}`,
+        `http://localhost:5000/1/report/plan/${plan_id}`,
         {
-          method: "PUT",
+          method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
+          
         }
       );
-      refreshCompletedTasks();
-      refreshUncompletedTasks();
+      refreshPlans();
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
@@ -69,11 +71,11 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
   function handleOnDragEnd(result) {
     if (!result.destination) return;
 
-    const items = Array.from(progress);
+    const items = Array.from(plans);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setProgress(items);
+    setPlans(items);
   }
 
   return (
@@ -83,10 +85,10 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
           <Droppable droppableId="progress">
             {(provided) => (
               <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
-                {progress.length > 0 ?(<>
-                {progress.map((plan, index) => {
+                {plans.length > 0 ?(<>
+                {plans.map((plan, index) => {
                   return (
-                    <Draggable key={`compplanid${plan.plan_id}`} draggableId={`compplanid${plan.plan_id}`} index={index}>
+                    <Draggable key={`planid${plan.plan_id}`} draggableId={`planid${plan.plan_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
@@ -94,9 +96,9 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
                           
                           
-                          <EditProgress plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
+                            <EditPlans refreshPlans={refreshPlans} plan={plan}></EditPlans>
                           
-                          <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
+                          <button className = "btn3 float-right" onClick={() => deletePlan({plan})}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
@@ -123,4 +125,4 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
 
 
 
-export default CompletedPlannedTasks;
+export default PlansList;
