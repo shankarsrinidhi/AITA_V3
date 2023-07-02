@@ -124,6 +124,24 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
   };
 
 
+  const displayStudent = (student) => {
+    try {
+        const getstudentname = [];
+        for(let i=0; i<student.length; i++)
+    {
+      if (i==0) {getstudentname.push(student[0]);}
+      else{
+      getstudentname.push(", "+student[i]);}
+    }
+        
+          //return students;
+          //console.log("students value "+getstudentname);
+          return getstudentname;
+    } catch (error) {
+      console.error('Error fetching updated data:', error);
+    }
+  };
+
 
   /*const updateProgress = async e => {
     e.preventDefault();
@@ -151,7 +169,7 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
         
         <div style={{width:"95%"}} onClick={handleShow}>
                           
-                            { plan.plan_title }
+                            { plan.plan_title } ({displayStudent(plan.student)})
                           
         </div>
         

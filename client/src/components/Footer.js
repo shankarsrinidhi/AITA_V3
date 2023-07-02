@@ -7,6 +7,8 @@ import "./css_components/nav.css";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 
 const Footer = () => {
+
+
     function CustomLink({ to, children, ...props }) {
         const resolvedPath = useResolvedPath(to);
         const isActive = useMatch({ path: resolvedPath.pathname, end: true });
@@ -28,7 +30,7 @@ const Footer = () => {
                 <i class="material-icons nav__icon">home</i>
                 <span class="nav__text">Dashboard</span>
             </CustomLink>
-            <CustomLink to="weeklyReport">
+            <CustomLink to={`/weeklyReport/${new Date("Mon Jan 31 2022 05:30:00 GMT-0500 (Eastern Standard Time)")}`}>
                 <i class="material-icons nav__icon">add_circle</i>
                 <span class="nav__text">Weekly Report</span>
             </CustomLink>

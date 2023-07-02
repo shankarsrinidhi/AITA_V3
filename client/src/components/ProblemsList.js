@@ -88,6 +88,7 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
                 {problems.length > 0 ?(<>
                 {problems.map((problem, index) => {
                   return (
+                    <>
                     <Draggable key={`problemid${problem.problem_id}`} draggableId={`problemid${problem.problem_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -98,12 +99,35 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
                           
                             <EditProblem refreshProblems={refreshProblems} problem={problem}></EditProblem>
                           
-                          <button className = "btn3 float-right" onClick={() => deleteProblem({problem})}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#ProbDelid${problem.problem_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
                       )}
                     </Draggable>
+
+                    
+                    <div class="modal fade" id={`ProbDelid${problem.problem_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLongTitle">Delete Problem?</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                          </div>
+                          <div class="modal-body">
+                          
+                          Are you sure you want to delete this problem?
+                          </div>
+                          <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                          <button type="button" class="btn btn-primary" onClick={() => deleteProblem({problem})} data-dismiss="modal">Yes</button>
+                          </div>
+                      </div>
+                      </div>
+                      </div>
+                      </>
                   );
                 })}</>)
 

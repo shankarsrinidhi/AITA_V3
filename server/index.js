@@ -98,6 +98,22 @@ app.post("/:project_id/report/:start_date/:end_date/problem", async(req,res)=>{
 });
 
 
+//post start weekly report
+app.post("/:project_id/startreport/:start_date/:end_date", async(req,res)=>{
+    try {
+       // console.log(req.body);
+        const { project_id } = req.params;
+        const { start_date , end_date } = req.params;
+        //const { title, description, mitigation, plan_id } = req.body;
+       // const timestamp = new Date();
+        const startReport = await pool.query("INSERT INTO weeklyreport(week_start_date, week_end_date, project_id, started) VALUES($1,$2,$3,true) RETURNING *",[start_date , end_date, project_id]);
+        res.json(startReport.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
 //Get routes 
 app.get("/teamName", async(req,res)=>{
     try {
@@ -146,6 +162,23 @@ app.get("/:project_id/objectives/check", async(req,res)=>{
         console.error(err.message);
     }
 });
+
+
+//home page display past weekly reports cards
+//SELECT jsonb_build_object( 'report_id', r.report_id, 'week_start_date', r.week_start_date, 'week_end_date', r.week_end_date, 'submitted_on', r.submitted_on, 'project_id', r.project_id, 'started', r.started, 'progress', jsonb_agg(jsonb_build_object('progress_id', p.progress_id, 'progress_title', p.progress_title))) AS report FROM weeklyreport r LEFT JOIN progress p ON r.report_id = p.report_id WHERE r.project_id = $1 AND r.week_start_date < $2 AND r.submitted_on IS NOT NULL GROUP BY r.report_id ORDER BY r.week_start_date
+app.get("/:project_id/pastweeklyreports/check", async(req,res)=>{
+    try {
+        const { project_id } = req.params;
+        
+        const todo =  await pool.query("SELECT jsonb_build_object( 'report_id', r.report_id, 'week_start_date', r.week_start_date, 'week_end_date', r.week_end_date, 'submitted_on', r.submitted_on, 'project_id', r.project_id, 'started', r.started, 'progress', jsonb_agg(jsonb_build_object('progress_id', p.progress_id, 'progress_title', p.progress_title))) AS report FROM weeklyreport r LEFT JOIN progress p ON r.report_id = p.report_id WHERE r.project_id = $1 AND r.submitted_on IS NOT NULL GROUP BY r.report_id ORDER BY r.week_start_date DESC",[project_id]);
+        res.json(todo.rows);
+        //console.log(todo.rows);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
 
 
 
@@ -244,7 +277,24 @@ app.get("/:project_id/report/:start_date/:end_date/uncompletedplans", async(req,
         const { start_date } = req.params;
         const { end_date } = req.params; 
        
-        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = false ",[start_date,end_date]);
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = false AND w.project_id = $3",[start_date,end_date,project_id]);
+        res.json(prog.rows);
+       // console.log(prog.rows[0]);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+//to get list of all planned tasks to be displayed on the home screen
+app.get("/:project_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>{
+    try {
+       // console.log("calling uncompleted plans on load");
+        const { project_id } = req.params;
+        const { start_date } = req.params;
+        const { end_date } = req.params; 
+       
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.project_id = $3",[start_date,end_date,project_id]);
         res.json(prog.rows);
        // console.log(prog.rows[0]);
 
@@ -281,7 +331,7 @@ app.get("/:project_id/report/:start_date/:end_date/plans", async(req,res)=>{
        
         const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2",[start_date,end_date]);
         res.json(prog.rows);
-      //  console.log(prog.rows[0]);
+        console.log(prog.rows[0]);
 
     } catch (err) {
         console.error(err.message);
@@ -336,6 +386,45 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
         }
     });
 
+
+    // to check if weekly report is started
+    //SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = '2022-02-06' AND week_end_date = '2022-02-12' AND project_id = 1) AS result;
+    app.get("/:project_id/reportstarted/:start_date/:end_date", async(req,res)=>{
+        try {
+            
+            const { project_id } = req.params;
+            const { start_date } = req.params;
+            const { end_date } = req.params; 
+            const isWRStarted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND project_id = $3) AS result",[start_date, end_date, project_id]);
+            console.log(isWRStarted.rows[0]);
+            res.json(isWRStarted.rows[0]);
+            
+            
+            
+    
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // to check if weekly report is submitted
+    app.get("/:project_id/reportsubmitted/:start_date/:end_date", async(req,res)=>{
+        try {
+            
+            const { project_id } = req.params;
+            const { start_date } = req.params;
+            const { end_date } = req.params; 
+            const isWRSubmitted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND project_id = $3 AND submitted_on IS NOT NULL) AS result",[start_date, end_date, project_id]);
+            console.log(isWRSubmitted.rows[0]);
+            res.json(isWRSubmitted.rows[0]);
+            
+            
+            
+    
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
 
 
 //put routes
@@ -498,6 +587,21 @@ app.put("/:project_id/problems/editproblem/:problem_id", async(req,res)=>{
     }
 });
 
+
+//mark weekly report as submitted
+app.put("/:project_id/submitreport/:start_date/:end_date", async(req,res)=>{
+    try {
+       // console.log(req.body);
+        const { project_id } = req.params;
+        const { start_date , end_date } = req.params;
+        //const { title, description, mitigation, plan_id } = req.body;
+        const timestamp = new Date();
+        const submitReport = await pool.query("UPDATE weeklyreport SET submitted_on = $1 WHERE week_start_date = $2 AND week_end_date = $3 AND project_id = $4",[timestamp, start_date , end_date, project_id]);
+        res.json(submitReport.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
 
 
 //delete/remove from the screen the plan of a previous week from progress section

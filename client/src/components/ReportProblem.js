@@ -102,7 +102,9 @@ const ReportProblem = ({ refreshProblems, week_start, week_end, plan_id }) => {
           body: JSON.stringify(body)
         }
       );
-      refreshProblems();
+      console.log("problems refressh valuye "+refreshProblems);
+      if (refreshProblems) refreshProblems();
+      //refreshProblems();
       handleClose();
       
     } catch (err) {

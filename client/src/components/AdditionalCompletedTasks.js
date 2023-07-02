@@ -87,6 +87,7 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
                 {progress.length > 0 ?(<>
                 {progress.map((progress, index) => {
                   return (
+                    <>
                     <Draggable key={`addprogid${progress.progress_id}`} draggableId={`addprogid${progress.progress_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
@@ -97,12 +98,36 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
                           
                           <EditNewAddedProgress refreshAdditionalCompletedTasks={refreshAdditionalCompletedTasks} progress={progress}></EditNewAddedProgress>
                           
-                          <button className = "btn3 float-right" onClick={() => deleteProg({progress})}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#ACTDelid${progress.progress_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
                       )}
                     </Draggable>
+
+                    <div class="modal fade" id={`ACTDelid${progress.progress_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        
+                        Are you sure you want to delete this task?
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-primary" onClick={() => deleteProg({progress})} data-dismiss="modal">Yes</button>
+                        </div>
+                    </div>
+                    </div>
+                  </div>
+
+
+                    </>
                   );
                 })}</>)
 
