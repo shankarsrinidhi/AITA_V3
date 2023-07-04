@@ -50,8 +50,8 @@ function Header() {
     <header>
         <head><link href="client/src/assets/fontawesome-free-6.4.0-web/css/solid.css" rel="stylesheet"/></head>
         <div>
-        <img src={pamplinlogo} style={pamplin} /> 
-        <div class="float-right"><FaBars style={{color: '#8f0000', fontSize: '50px', padding: '7.5px', marginTop:'25px'}} className="btn"/></div><br></br>
+        <img className= "mt-2" src={pamplinlogo} style={pamplin} /> 
+        <div className="float-right"><FaBars style={{color: '#8f0000', fontSize: '50px', padding: '7.5px', marginTop:'25px'}} className="btn"/></div><br></br>
         </div>
         <div>
       <h4 className="centered">{teamName.team_name}</h4>

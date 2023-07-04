@@ -43,7 +43,7 @@ function ReportCards() {
                 </div>
             </>) : <>
             {cards.map((card, i) => (
-              <div key={i} className="card" onClick={() => window.location = `/weeklyReport/${card.report.week_end_date}`}>
+              <div key={i} className="speccard" onClick={() => window.location = `/weeklyReport/${card.report.week_end_date}`}>
                 <div><h3 className="text-center">Week Ending {formatDate(card.report.week_end_date)}</h3></div>
                 <hr style={{color: '#8f0000', width: '100%', margin:'2px'}}></hr>
                 <h6 className="text-center" style={{color:'#8f0000'}}>Progress reported for the week</h6>

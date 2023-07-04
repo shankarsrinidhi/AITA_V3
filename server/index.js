@@ -113,6 +113,20 @@ app.post("/:project_id/startreport/:start_date/:end_date", async(req,res)=>{
     }
 });
 
+//post new student on signup
+app.post("/student/new", async(req,res)=>{
+    try {
+       // console.log(req.body);
+        
+        const { firstName , lastName, phone, email } = req.body;
+        
+        const newStudent = await pool.query("INSERT INTO student(email, phone_number, first_name, last_name) VALUES($1,$2,$3,$4) RETURNING *",[email , phone, firstName, lastName]);
+        res.json(newStudent.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
 
 //Get routes 
 app.get("/teamName", async(req,res)=>{
@@ -129,6 +143,7 @@ app.get("/teamName", async(req,res)=>{
 app.get("/todos", async(req,res)=>{
     try {
         //const { id } = req.params;
+        //console.log(req.headers.authorization);
         const todo =  await pool.query("SELECT * FROM todo");
         res.json(todo.rows);
 

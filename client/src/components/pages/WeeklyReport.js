@@ -5,6 +5,8 @@
   import '../css_components/WeeklyReport.css'
   import Modal from 'react-bootstrap/Modal';
   import Button from 'react-bootstrap/Button';
+  import Header from "../Header";
+  import Footer from "../Footer";
   
 
   import 'bootstrap/dist/css/bootstrap.min.css';
@@ -290,12 +292,17 @@ import { useParams } from 'react-router-dom';
   
     return (
     <Fragment>
-      <div>
+      <div className='container'>
+    <Header/>
+    <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Home</h4>
+    <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+    </div>
+      <div className='container'>
         <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Submit Weekly Report</h4>
         <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
         
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button className = "btn1 float-left" onClick={handlePreviousWeek}><AiFillCaretLeft></AiFillCaretLeft>Prev</button>
           <h5 className="text-center mr-1 ml-1" style={{color:'#8F0000', fontFamily: 'Lato'}}>
             Week : {getWeekStartDate().toDateString()} - {getWeekEndDate().toDateString()}
@@ -360,6 +367,10 @@ import { useParams } from 'react-router-dom';
         
 
       </div>
+
+      <div>
+          <Footer />
+        </div>
 
       <Modal
         show={showSuccess}

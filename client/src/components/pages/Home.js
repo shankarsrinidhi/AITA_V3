@@ -1,6 +1,8 @@
 import React, { Fragment, useState, useEffect } from "react";
 import HomePlannedTasks from "../HomePlannedTasks"
 import ReportCards from "../ReportCards";
+import Header from "../Header";
+import Footer from "../Footer";
 
 export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date("Mon Feb 08 2022 05:30:00 GMT+0530 (India Standard Time)"));
@@ -56,9 +58,13 @@ export default function Home() {
 
 
   return(<Fragment>
-  <div>
+    <div className='container'>
+    <Header/>
     <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Home</h4>
     <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+    </div>
+  <div>
+    
     <div className='container'>
 
           <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Planned Tasks for this week</h4>
@@ -75,6 +81,10 @@ export default function Home() {
   
      
      </div>
+
+     <div>
+          <Footer />
+        </div>
 
                 
      </Fragment>)

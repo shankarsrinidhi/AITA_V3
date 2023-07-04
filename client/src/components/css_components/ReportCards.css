@@ -25,7 +25,7 @@
     justify-content: space-between;
     width: 100%;
   }
-  .card {
+  .speccard {
     flex: 0 0 calc(33.33% - 20px);
     max-width: calc(33.33% - 20px);
     width: 100%;
@@ -37,17 +37,17 @@
     border: 2px solid transparent;
     box-shadow: 0px 0px 2px;
   }
-  .card:hover {
+  .speccard:hover {
     border-color: #8f0000;
   }
   
-  .card h3 {
+  .speccard h3 {
     font-size: 20px;
     color: #8f0000;
     margin-bottom: 20px;
     margin-right: 0%;
   }
-  .card .btn {
+  .speccard .btn {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -64,7 +64,7 @@
     transition: 0.3s;
     border: 1px solid #8f0000;
   }
-  .card .btn:hover {
+  .speccard .btn:hover {
     color: #8f0000;
     background: transparent;
   }
@@ -76,14 +76,14 @@
     section h1 {
       font-size: 40px;
     }
-    .card {
+    .speccard {
       flex: 0 0 calc(50% - 10px);
       max-width: calc(50% - 10px);
     }
   }
   @media (max-width: 767px) {
     
-    .card {
+    .speccard {
       flex: 0 0 100%;
       max-width: 100%;
     }

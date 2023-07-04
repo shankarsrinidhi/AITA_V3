@@ -13,19 +13,24 @@ import { Route, Routes } from "react-router-dom";
 import MOKR from "./components/pages/MOKR";
 import WeeklyReport from "./components/pages/WeeklyReport";
 import  Home  from "./components/pages/Home";
-import SignUp from "./components/SignUp";
+import SignUp from "./components/pages/SignUp";
+import LogIn from "./components/pages/LogIn";
+
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
+    <AuthProvider>
     <Fragment>
       
           
 
         
-      <div className="container">
-      <Header/>
+      
+      
       <Routes>
-          
+         <Route path="/login" element={<LogIn />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/" element={<Home />} />
           <Route path="/weeklyReport/:week_start" element={<WeeklyReport />} />
           
@@ -34,12 +39,11 @@ function App() {
         
         
         
-      </div>
-      <div>
-          <Footer />
-        </div>
+      
+     
       
     </Fragment>
+    </AuthProvider>
   );
 }
 
