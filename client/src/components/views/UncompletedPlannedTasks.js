@@ -86,9 +86,13 @@ function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks
         const getstudentname = [];
         for(let i=0; i<student.length; i++)
     {
-      if (i==0) {getstudentname.push(student[0]);}
+      if (i===0) 
+      {
+        getstudentname.push(student[0]);
+      }
       else{
-      getstudentname.push(", "+student[i]);}
+      getstudentname.push(", "+student[i]);
+    }
     }
         
           //return students;
