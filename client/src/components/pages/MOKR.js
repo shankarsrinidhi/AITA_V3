@@ -10,6 +10,8 @@ import "../css_components/mokr.css"
 import ListTodos from "../ListTodos";
 import Mission from '../Mission';
 import AddObjective from '../AddObjective';
+import Footer from '../Footer';
+import Header from '../Header';
 
 
 const MOKR = () => {
@@ -87,6 +89,9 @@ const MOKR = () => {
 
   return (
     <Fragment>
+
+      <div className='container'>
+      <Header/>
       <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>MOKR</h4>
       <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
       
@@ -103,7 +108,9 @@ const MOKR = () => {
       
       </div> 
        <ListTodos></ListTodos>
-      
+       </div>
+       <br></br>
+       <Footer></Footer>
     </Fragment>
   );
 };

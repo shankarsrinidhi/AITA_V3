@@ -5,15 +5,15 @@ import Modal from 'react-bootstrap/Modal';
 import { MdOutlineModeEditOutline } from "react-icons/md";
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditPlans = ({ plan, refreshPlans }) => {
+const EditUncompletedPlan = ({ plan_id, plan_title, plan_description, student, related_objectives, marked_complete, refreshUncompletedTasks, refreshHomeTasks }) => {
   //console.log("in edit objective "+objective.objective.objective_id);
   
-  const [title, setTitle] = useState(plan.plan_title);
-  const [description, setDescription] = useState(plan.description);
+  const [title, setTitle] = useState(plan_title);
+  const [description, setDescription] = useState(plan_description);
   const [studentOptions, setStudentOptions] = useState([]);
-  const [selectedStudentOptions, setSelectedStudentOptions] = useState(plan.student);
-  const [objectives, setObjectives] = useState(plan.related_objectives);
-  const [selectedObjectives, setSelectedObjectives] = useState(plan.related_objectives);
+  const [selectedStudentOptions, setSelectedStudentOptions] = useState(student);
+  const [objectives, setObjectives] = useState(related_objectives);
+  const [selectedObjectives, setSelectedObjectives] = useState(related_objectives);
   const [show, setShow] = useState(false);
   
 
@@ -125,7 +125,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
           
-          `http://localhost:5000/1/plans/editplan/${plan.plan_id}`,
+          `http://localhost:5000/1/plans/editplan/${plan_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -134,7 +134,9 @@ const EditPlans = ({ plan, refreshPlans }) => {
         );
         //refreshCompletedTasks();
         //refreshUncompletedTasks();
-        refreshPlans();
+        //refreshPlans();
+        if (refreshUncompletedTasks) refreshUncompletedTasks();
+        if (refreshHomeTasks) refreshHomeTasks();
       handleClose();
       
     } catch (err) {
@@ -149,8 +151,8 @@ const EditPlans = ({ plan, refreshPlans }) => {
     <Fragment>
         
         <div style={{width:"95%"}} onClick={handleShow}>
-                          
-                            { plan.plan_title } ({displayStudent(plan.student)})
+                          {marked_complete ? (<s style={{color:'#8f0000', textDecoration:'line-through'}}>{ plan_title } ({displayStudent(student)})</s>) : (<>{ plan_title } ({displayStudent(student)})</>)}
+                            
                           
         </div>
         
@@ -230,4 +232,4 @@ const EditPlans = ({ plan, refreshPlans }) => {
   );
 };
 
-export default EditPlans;
+export default EditUncompletedPlan;

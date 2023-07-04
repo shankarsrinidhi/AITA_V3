@@ -44,7 +44,23 @@ const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => 
       }
     };*/
 
-    
+    const displayStudent = (student) => {
+      try {
+          const getstudentname = [];
+          for(let i=0; i<student.length; i++)
+      {
+        if (i==0) {getstudentname.push(student[0]);}
+        else{
+        getstudentname.push(", "+student[i]);}
+      }
+          
+            //return students;
+            //console.log("students value "+getstudentname);
+            return getstudentname;
+      } catch (error) {
+        console.error('Error fetching updated data:', error);
+      }
+    };
 
 
 
@@ -152,7 +168,7 @@ const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => 
         
         <div style={{width:"95%"}} onClick={handleShow}>
                           
-                            { progress.progress_title }
+                            { progress.progress_title } ({displayStudent(progress.student)})
                           
         </div>
         
