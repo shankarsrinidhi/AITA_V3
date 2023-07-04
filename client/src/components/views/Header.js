@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { icon } from '@fortawesome/fontawesome-svg-core/import.macro'
 import { FaBars } from "react-icons/fa";
 
-import pamplinlogo from './logo-images/pamplin.png';
+import pamplinlogo from '../logo-images/pamplin.png';
 
 
 

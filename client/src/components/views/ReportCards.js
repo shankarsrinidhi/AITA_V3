@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./css_components/ReportCards.css";
+import "../css_components/ReportCards.css";
 
 
 function ReportCards() {

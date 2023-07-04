@@ -7,11 +7,11 @@ import axios from "axios"
 
 import React, { Fragment, useState, useEffect } from "react";
 import "../css_components/mokr.css"
-import ListTodos from "../ListTodos";
-import Mission from '../Mission';
-import AddObjective from '../AddObjective';
-import Footer from '../Footer';
-import Header from '../Header';
+import ListTodos from "../views/ListTodos";
+import Mission from '../views/Mission';
+import AddObjective from '../views/AddObjective';
+import Footer from '../views/Footer';
+import Header from '../views/Header';
 
 
 const MOKR = () => {

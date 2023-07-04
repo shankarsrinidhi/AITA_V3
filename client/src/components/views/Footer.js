@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import "./css_components/nav.css";
+import "../css_components/nav.css";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 
 const Footer = () => {

@@ -1,8 +1,8 @@
 import React, { Fragment, useState, useEffect } from "react";
-import HomePlannedTasks from "../HomePlannedTasks"
-import ReportCards from "../ReportCards";
-import Header from "../Header";
-import Footer from "../Footer";
+import HomePlannedTasks from "../views/HomePlannedTasks"
+import ReportCards from "../views/ReportCards";
+import Header from "../views/Header";
+import Footer from "../views/Footer";
 
 export default function Home() {
   const [currentDate, setCurrentDate] = useState(new Date("Mon Feb 08 2022 05:30:00 GMT+0530 (India Standard Time)"));

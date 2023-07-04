@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import {RxDragHandleDots2} from "react-icons/rx";
-
+import {FaExclamation} from "react-icons/fa";
 import {AiOutlineDelete} from "react-icons/ai";
+import {AiFillCheckCircle} from "react-icons/ai";
+
+import '../css_components/DraggableCardList.css';
+import EditProgress from "./EditProgress";
 
 
-import './css_components/DraggableCardList.css';
-import EditNewAddedProgress from "./EditNewAddedProgress";
-
-
-function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, week_end}) {
-    
+function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
+    //console.log("week start in completed tasks "+week_start+" week end "+week_end);
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/additionalprogress`);
+      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/completedplans`);
       const jsonData = await response.json();
       
 
@@ -43,23 +43,22 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
     }
   };
 
-
-  ///:project_id/report/progress/:progress_id
-  const deleteProg = async ({progress}) =>{
+  const markUncomplete = async ({plan}) =>{
    // e.preventDefault();
     try {
-      const progress_id= progress.progress_id;
+      const plan_title = plan.plan_title
+      const body = { plan_title };
       const response = await fetch(
         
-        `http://localhost:5000/1/report/progress/${progress_id}`,
+        `http://localhost:5000/1/progress/markasincomplete/${plan.plan_id}`,
         {
-          method: "DELETE",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          
+          body: JSON.stringify(body)
         }
       );
-      refreshAdditionalCompletedTasks();
-      
+      refreshCompletedTasks();
+      refreshUncompletedTasks();
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
@@ -85,10 +84,9 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
             {(provided) => (
               <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
                 {progress.length > 0 ?(<>
-                {progress.map((progress, index) => {
+                {progress.map((plan, index) => {
                   return (
-                    <>
-                    <Draggable key={`addprogid${progress.progress_id}`} draggableId={`addprogid${progress.progress_id}`} index={index}>
+                    <Draggable key={`compplanid${plan.plan_id}`} draggableId={`compplanid${plan.plan_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
@@ -96,38 +94,14 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
                           
                           
-                          <EditNewAddedProgress refreshAdditionalCompletedTasks={refreshAdditionalCompletedTasks} progress={progress}></EditNewAddedProgress>
+                          <EditProgress plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
                           
-                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#ACTDelid${progress.progress_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                          <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
                           
                           </div>
                         </li>
                       )}
                     </Draggable>
-
-                    <div class="modal fade" id={`ACTDelid${progress.progress_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        </div>
-                        <div class="modal-body">
-                        
-                        Are you sure you want to delete this task?
-                        </div>
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                        <button type="button" class="btn btn-primary" onClick={() => deleteProg({progress})} data-dismiss="modal">Yes</button>
-                        </div>
-                    </div>
-                    </div>
-                  </div>
-
-
-                    </>
                   );
                 })}</>)
 
@@ -149,4 +123,4 @@ function AdditionalCompletedTasks({refreshAdditionalCompletedTasks, week_start, 
 
 
 
-export default AdditionalCompletedTasks;
+export default CompletedPlannedTasks;

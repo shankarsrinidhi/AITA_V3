@@ -1,12 +1,12 @@
 import React, { Fragment } from "react";
 import { Container, AppBar, Typography, Grow, Grid } from '@mui/material';
-import Header from "./components/Header";
+import Header from "./components/views/Header";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
 
 //components
 
-import Footer from "./components/Footer";
+import Footer from "./components/views/Footer";
 import { Route, Routes } from "react-router-dom";
 import MOKR from "./components/pages/MOKR";
 import WeeklyReport from "./components/pages/WeeklyReport";

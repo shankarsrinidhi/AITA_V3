@@ -5,29 +5,29 @@ import {RxDragHandleDots2} from "react-icons/rx";
 import {AiOutlineDelete} from "react-icons/ai";
 
 
-import './css_components/DraggableCardList.css';
-import EditProblem from "./EditProblem";
+import '../css_components/DraggableCardList.css';
+import EditPlans from "./EditPlans";
 
 
 
-function ProblemsList({refreshProblems, week_start, week_end}) {
+function PlansList({refreshPlans, week_start, week_end}) {
     
-  const [problems, setProblems] = useState([]);
+  const [plans, setPlans] = useState([]);
 
-  const getProblems = async () => {
+  const getPlans = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/problems`);
+      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/plans`);
       const jsonData = await response.json();
       
 
-      setProblems(jsonData);
+      setPlans(jsonData);
     } catch (err) {
       console.error(err.message);
     }
   };
 
   useEffect(() => {
-    getProblems();
+    getPlans();
   }, []);
   //console.log(plans);
 
@@ -46,20 +46,20 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
 
 
   ///:project_id/report/progress/:progress_id
-  const deleteProblem = async ({problem}) =>{
+  const deletePlan = async ({plan}) =>{
    // e.preventDefault();
     try {
-      const problem_id= problem.problem_id;
+      const plan_id= plan.plan_id;
       const response = await fetch(
         
-        `http://localhost:5000/1/report/problem/${problem_id}`,
+        `http://localhost:5000/1/report/plan/${plan_id}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           
         }
       );
-      refreshProblems();
+      refreshPlans();
       
     } catch (error) {
       console.error('Error fetching updated data:', error);
@@ -71,25 +71,25 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
   function handleOnDragEnd(result) {
     if (!result.destination) return;
 
-    const items = Array.from(problems);
+    const items = Array.from(plans);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setProblems(items);
+    setPlans(items);
   }
 
   return (
     <div>
      
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="problems">
+          <Droppable droppableId="progress">
             {(provided) => (
               <ul className="characters" {...provided.droppableProps} ref={provided.innerRef}>
-                {problems.length > 0 ?(<>
-                {problems.map((problem, index) => {
+                {plans.length > 0 ?(<>
+                {plans.map((plan, index) => {
                   return (
                     <>
-                    <Draggable key={`problemid${problem.problem_id}`} draggableId={`problemid${problem.problem_id}`} index={index}>
+                    <Draggable key={`planid${plan.plan_id}`} draggableId={`planid${plan.plan_id}`} index={index}>
                       {(provided) => (
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
@@ -97,37 +97,37 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
                           
                           
-                            <EditProblem refreshProblems={refreshProblems} problem={problem}></EditProblem>
+                            <EditPlans refreshPlans={refreshPlans} plan={plan}></EditPlans>
                           
-                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#ProbDelid${problem.problem_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#PLDelid${plan.plan_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           
                           </div>
                         </li>
                       )}
                     </Draggable>
 
-                    
-                    <div class="modal fade" id={`ProbDelid${problem.problem_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                      <div class="modal fade" id={`PLDelid${plan.plan_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered" role="document">
                       <div class="modal-content">
                           <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLongTitle">Delete Problem?</h5>
+                          <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
                           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                           </button>
                           </div>
                           <div class="modal-body">
                           
-                          Are you sure you want to delete this problem?
+                          Are you sure you want to delete this task?
                           </div>
                           <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                          <button type="button" class="btn btn-primary" onClick={() => deleteProblem({problem})} data-dismiss="modal">Yes</button>
+                          <button type="button" class="btn btn-primary" onClick={() => deletePlan({plan})} data-dismiss="modal">Yes</button>
                           </div>
                       </div>
                       </div>
                       </div>
                       </>
+
                   );
                 })}</>)
 
@@ -149,4 +149,4 @@ function ProblemsList({refreshProblems, week_start, week_end}) {
 
 
 
-export default ProblemsList;
+export default PlansList;

@@ -5,20 +5,20 @@
   import '../css_components/WeeklyReport.css'
   import Modal from 'react-bootstrap/Modal';
   import Button from 'react-bootstrap/Button';
-  import Header from "../Header";
-  import Footer from "../Footer";
+  import Header from "../views/Header";
+  import Footer from "../views/Footer";
   
 
   import 'bootstrap/dist/css/bootstrap.min.css';
 
-import CompletedPlannedTasks from "../CompletedPlannedTasks";
-import UncompletedPlannedTasks from "../UncompletedPlannedTasks";
-import AdditionalCompletedTasks from "../AdditionalCompletedTasks";
-import AddProgressRow from "../AddProgressRow";
-import PlansList from "../PlansList";
-import AddPlan from "../AddPlan";
-import ProblemsList from "../ProblemsList";
-import AddProblem from "../AddProblem";
+import CompletedPlannedTasks from "../views/CompletedPlannedTasks";
+import UncompletedPlannedTasks from "../views/UncompletedPlannedTasks";
+import AdditionalCompletedTasks from "../views/AdditionalCompletedTasks";
+import AddProgressRow from "../views/AddProgressRow";
+import PlansList from "../views/PlansList";
+import AddPlan from "../views/AddPlan";
+import ProblemsList from "../views/ProblemsList";
+import AddProblem from "../views/AddProblem";
 import { useParams } from 'react-router-dom';
   
   
