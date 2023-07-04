@@ -10,7 +10,7 @@ import Modal from 'react-bootstrap/Modal';
 
 //import AddObjective from "./AddObjective";
 
-import EditTodo from "./EditTodo";
+
 import DeleteObjective from "./DeleteObjective";
 import EditKR from "./EditKR";
 import DeleteKR from "./DeleteKR";

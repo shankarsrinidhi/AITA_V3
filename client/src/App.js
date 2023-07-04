@@ -6,8 +6,6 @@ import "./App.css";
 
 //components
 
-import InputTodo from "./components/InputTodo";
-import ListTodos from "./components/ListTodos";
 import Footer from "./components/Footer";
 import { Route, Routes } from "react-router-dom";
 import MOKR from "./components/pages/MOKR";

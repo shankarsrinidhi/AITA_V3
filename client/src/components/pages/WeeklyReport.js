@@ -10,8 +10,7 @@
   
 
   import 'bootstrap/dist/css/bootstrap.min.css';
-  import Progress from "../Progress";
-import DraggableCardList from "../DraggableCardList";
+
 import CompletedPlannedTasks from "../CompletedPlannedTasks";
 import UncompletedPlannedTasks from "../UncompletedPlannedTasks";
 import AdditionalCompletedTasks from "../AdditionalCompletedTasks";
