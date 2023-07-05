@@ -3,33 +3,19 @@ import { MdOutlineModeEditOutline } from "react-icons/md";
 import { BiSave } from "react-icons/bi";
 import { GrClose } from "react-icons/gr";
 import axios from "axios"
-
 import React, { Fragment, useState, useEffect } from "react";
 
-
 const Mission = () =>{
-    //const [missionOnload, setMissionOnload] = useState([]);
     const [mission, setMission] = useState("");
     const [initialMissionValue, setInitialMissionValue] = useState("");
+    const [missionEditButtonVisible, setMissionEditButtonVisible] = useState(false);
+
     useEffect(() => {
       axios.get("http://localhost:5000/1/mission").then((response) => {
         setMission(response.data.mission);
         setInitialMissionValue(response.data.mission);
       });
-    }, []);
-console.log("check missiononload");
-    console.log(mission);
-
-
-    //const [mission, setMission] = useState("");
-    //setMission(missionOnload);
-    const [missionEditButtonVisible, setMissionEditButtonVisible] = useState(false);
-    console.log(mission);
-
-    //const [value, setValue] = useState("mission1");
-    //const [initialMissionValue, setInitialMissionValue] = useState("");
-   // setInitialMissionValue(missionOnload);
-    console.log(mission);
+    }, []); 
 
     const handleChange = (event) => {
         setMission(event.target.value);
@@ -41,36 +27,29 @@ console.log("check missiononload");
     };
 
     const onSaveMission = async e => {
-    e.preventDefault();
-    try {
-      setInitialMissionValue(mission);
-      //setMission(initialValue);
-      console.log(mission);
-      const body = { mission };
-      const response = await fetch("http://localhost:5000/1/mission", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-
-     // window.location = "/";
-     setMissionEditButtonVisible(false);
-    } catch (err) {
-      console.error(err.message);
-    }
+      e.preventDefault();
+      try {
+        setInitialMissionValue(mission);
+        const body = { mission };
+        const response = await fetch("http://localhost:5000/1/mission", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+      setMissionEditButtonVisible(false);
+      } catch (err) {
+        console.error(err.message);
+      }
   };
 
   const disableMissionEdit = async e => {
     e.preventDefault();
     try {
       setMissionEditButtonVisible(true);
-      //window.location = "/MOKR";
     } catch (err) {
       console.error(err.message);
     }
   };
-
-
 
 return(
     <Fragment>
@@ -93,11 +72,9 @@ return(
           <button className="btn2 float-right ml-2 mt-1" visible ={false} disabled = {!missionEditButtonVisible} data-toggle="modal" data-target="#exampleModalCenter"><BiSave  style={{fontSize:'1.5rem'}}/></button>}
           <button className="btn2 float-right ml-2 mt-1" disabled = {!missionEditButtonVisible} onClick={handleCancel}><GrClose style={{fontSize:'1rem'}}/></button>
           <button className="btn2 float-right ml-2 mt-1" disabled = {missionEditButtonVisible} onClick={disableMissionEdit}><MdOutlineModeEditOutline style={{fontSize:'1.5rem'}}/></button>
-          
         </div>
         </div>
         </div>
-
         <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">

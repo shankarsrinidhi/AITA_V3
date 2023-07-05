@@ -2,12 +2,9 @@ import React, { Fragment, useState, useEffect } from "react";
 import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { MdOutlineModeEditOutline } from "react-icons/md";
 import {Multiselect} from 'multiselect-react-dropdown';
 
 const EditProgress = ({ plan, refreshCompletedTasks }) => {
-  //console.log("in edit objective "+objective.objective.objective_id);
-  const [progress,setProgress] = useState([]);
   const [title, setTitle] = useState(plan.plan_title);
   const [description, setDescription] = useState(plan.description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -16,37 +13,16 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
   const [selectedObjectives, setSelectedObjectives] = useState(plan.related_objectives);
   const [show, setShow] = useState(false);
   
-
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   const handleStudentOptionSelect = (event) => {
     setSelectedStudentOptions(event);
-    console.log("value of students "+selectedStudentOptions)
   };
 
   const handleObjectivesOptionSelect = (event) => {
     setSelectedObjectives(event);
-    console.log("value of objectives "+selectedObjectives);
   };
-
-  /*const fetchProgressDetails = async () => {
-    try {
-      
-      const reqData= await fetch(`http://localhost:5000/${plan_id}/progress`);
-      const resData= await reqData.json();
-      setProgress(resData);
-      setTitle(progress.progress_title);
-      console.log("fetch progress tutle "+title);
-      
-    }catch (error) {
-        console.error("Error fetching options:", error);
-      }
-    };*/
-
-    
-
-
 
   useEffect(() => {
     fetchStudentOptions();
@@ -54,12 +30,9 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
 
   const fetchStudentOptions = async () => {
     try {
-      //const response = await axios.get("http://localhost:5000/1/studentsdropdown"); 
       const getstudentname=[];
-
       const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
       const resData= await reqData.json();
-      //console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
       getstudentname.push(resData[i].full_name);
@@ -72,12 +45,9 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
 
   const fetchObjectiveOptions = async () => {
     try {
-      
       const getobjectivetitle=[];
-
       const reqData= await fetch("http://localhost:5000/1/objectives");
       const resData= await reqData.json();
-      //console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
         getobjectivetitle.push(resData[i].objective_title);
@@ -103,10 +73,8 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
         return;
       }
     try {
-        //:project_id/progress/editcompletedplan/:plan_id
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
-          
           `http://localhost:5000/1/progress/editcompletedplan/${plan.plan_id}`,
           {
             method: "PUT",
@@ -114,15 +82,12 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
             body: JSON.stringify(body)
           }
         );
-        refreshCompletedTasks();
-        //refreshUncompletedTasks();
+      refreshCompletedTasks();
       handleClose();
-      
     } catch (err) {
       console.error(err.message);
     }
   };
-
 
   const displayStudent = (student) => {
     try {
@@ -133,46 +98,17 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
       else{
       getstudentname.push(", "+student[i]);}
     }
-        
-          //return students;
-          //console.log("students value "+getstudentname);
-          return getstudentname;
+    return getstudentname;
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
   };
 
-
-  /*const updateProgress = async e => {
-    e.preventDefault();
-    try {
-      console.log("checking to see if edit is called everytime "+objective.objective.objective_id)
-      const body = { title, description };
-      const response = await fetch(
-        `http://localhost:5000/1/objectives/${objective.objective.objective_id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        }
-      );
-      await updateData();
-      handleClose();
-      
-    } catch (err) {
-      console.error(err.message);
-    }
-  };*/
-
   return (
     <Fragment>
-        
         <div style={{width:"95%"}} onClick={handleShow}>
-                          
-                            { plan.plan_title } ({displayStudent(plan.student)})
-                          
+          { plan.plan_title } ({displayStudent(plan.student)})               
         </div>
-        
         <Modal
         show={show}
         onHide={handleClose}
@@ -184,7 +120,6 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
           <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Add Progress</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        
                 <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Progress Title</h5>
                 <input
                 required 
@@ -206,19 +141,15 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
                    <br></br>
                    <br></br>
                 <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Teammates Responsible</h5>
-
-                  
-                      <Multiselect 
-                      isObject={false}
-                      onRemove={handleStudentOptionSelect}
-                      onSelect={  handleStudentOptionSelect}
-                      options={ studentOptions }
-                      required = {true}               
-
-                      showCheckbox
-                      />   
-                      <br></br>
-                  
+                <Multiselect 
+                  isObject={false}
+                  onRemove={handleStudentOptionSelect}
+                  onSelect={  handleStudentOptionSelect}
+                  options={ studentOptions }
+                  required = {true}               
+                  showCheckbox
+                 />   
+                <br></br>
                 <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Select Related Objectives</h5>   
                 <Multiselect 
                       isObject={false}
@@ -226,25 +157,17 @@ const EditProgress = ({ plan, refreshCompletedTasks }) => {
                       onSelect={  handleObjectivesOptionSelect}
                       options={ objectives }
                       required = {true} 
-                                    
-
                       showCheckbox
-                      />   
-                      
-          
+                />   
         </Modal.Body>
         <Modal.Footer>
-         
           <Button variant="primary" type="submit" class="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          
         </Modal.Footer>
         </form>
       </Modal>
-
-
     </Fragment>
   );
 };

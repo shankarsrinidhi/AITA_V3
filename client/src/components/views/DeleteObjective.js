@@ -1,21 +1,13 @@
 import React, { Fragment, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 
-
 const DeleteObjective = ({ objective , updateData }) => {
-    console.log("before check objective id is "+ objective.objective.objective_id);
-
-
     const deleteObjective = async e => {
-        //e.preventDefault();
         try {
-            console.log("objective id is "+ objective.objective.objective_id);
           const deleteObjective = await fetch(`http://localhost:5000/1/objectives/${objective.objective.objective_id}`, {
             method: "DELETE"
           });
-    
           updateData();
-          
         } catch (err) {
           console.error(err.message);
         }
@@ -24,9 +16,8 @@ const DeleteObjective = ({ objective , updateData }) => {
     return (
         <Fragment>
             <button className="btn3 float-right" data-toggle="modal" data-target={`#objid${objective.objective.objective_id}`}>
-                  <AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete>
+              <AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete>
             </button>
-
                 <div class="modal fade" id={`objid${objective.objective.objective_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -48,7 +39,6 @@ const DeleteObjective = ({ objective , updateData }) => {
                   </div>
                 </div>
         </Fragment>
-
     );
 };
 

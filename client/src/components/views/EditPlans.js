@@ -2,12 +2,9 @@ import React, { Fragment, useState, useEffect } from "react";
 import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { MdOutlineModeEditOutline } from "react-icons/md";
 import {Multiselect} from 'multiselect-react-dropdown';
 
 const EditPlans = ({ plan, refreshPlans }) => {
-  //console.log("in edit objective "+objective.objective.objective_id);
-  
   const [title, setTitle] = useState(plan.plan_title);
   const [description, setDescription] = useState(plan.description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -15,38 +12,17 @@ const EditPlans = ({ plan, refreshPlans }) => {
   const [objectives, setObjectives] = useState(plan.related_objectives);
   const [selectedObjectives, setSelectedObjectives] = useState(plan.related_objectives);
   const [show, setShow] = useState(false);
-  
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
   const handleStudentOptionSelect = (event) => {
     setSelectedStudentOptions(event);
-    //console.log("value of students "+selectedStudentOptions)
   };
 
   const handleObjectivesOptionSelect = (event) => {
     setSelectedObjectives(event);
-    //console.log("value of objectives "+selectedObjectives);
   };
-
-  /*const fetchProgressDetails = async () => {
-    try {
-      
-      const reqData= await fetch(`http://localhost:5000/${plan_id}/progress`);
-      const resData= await reqData.json();
-      setProgress(resData);
-      setTitle(progress.progress_title);
-     // console.log("fetch progress tutle "+title);
-      
-    }catch (error) {
-        console.error("Error fetching options:", error);
-      }
-    };*/
-
-    
-
-
 
   useEffect(() => {
     fetchStudentOptions();
@@ -54,12 +30,9 @@ const EditPlans = ({ plan, refreshPlans }) => {
 
   const fetchStudentOptions = async () => {
     try {
-      //const response = await axios.get("http://localhost:5000/1/studentsdropdown"); 
       const getstudentname=[];
-
       const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
       const resData= await reqData.json();
-      //console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
       getstudentname.push(resData[i].full_name);
@@ -72,12 +45,9 @@ const EditPlans = ({ plan, refreshPlans }) => {
 
   const fetchObjectiveOptions = async () => {
     try {
-      
       const getobjectivetitle=[];
-
       const reqData= await fetch("http://localhost:5000/1/objectives");
       const resData= await reqData.json();
-      //console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
         getobjectivetitle.push(resData[i].objective_title);
@@ -101,10 +71,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
       else{
       getstudentname.push(", "+student[i]);}
     }
-        
-          //return students;
-          //console.log("students value "+getstudentname);
-          return getstudentname;
+      return getstudentname;
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }
@@ -121,10 +88,8 @@ const EditPlans = ({ plan, refreshPlans }) => {
         return;
       }
     try {
-       
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
-          
           `http://localhost:5000/1/plans/editplan/${plan.plan_id}`,
           {
             method: "PUT",
@@ -132,9 +97,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
             body: JSON.stringify(body)
           }
         );
-        //refreshCompletedTasks();
-        //refreshUncompletedTasks();
-        refreshPlans();
+      refreshPlans();
       handleClose();
       
     } catch (err) {
@@ -142,18 +105,11 @@ const EditPlans = ({ plan, refreshPlans }) => {
     }
   };
 
-
-
-
   return (
     <Fragment>
-        
-        <div style={{width:"95%"}} onClick={handleShow}>
-                          
-                            { plan.plan_title } ({displayStudent(plan.student)})
-                          
+        <div style={{width:"95%"}} onClick={handleShow}>        
+          { plan.plan_title } ({displayStudent(plan.student)})          
         </div>
-        
         <Modal
         show={show}
         onHide={handleClose}
@@ -165,67 +121,54 @@ const EditPlans = ({ plan, refreshPlans }) => {
           <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Edit Plan</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plan Title</h5>
-                <input
-                required 
-                  type="text"
-                  className="form-control"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                />
-                <br></br>
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Plan</h5>
-                <TextField
-                  multiline
-                  required
-                  rows={4}
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  style ={{width:'100%'}}
-                  />
-                   <br></br>
-                   <br></br>
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Teammates Responsible</h5>
-
-                  
-                      <Multiselect 
-                      isObject={false}
-                      onRemove={handleStudentOptionSelect}
-                      onSelect={  handleStudentOptionSelect}
-                      options={ studentOptions }
-                      required = {true}               
-
-                      showCheckbox
-                      />   
-                      <br></br>
-                  
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Select Related Objectives</h5>   
-                <Multiselect 
-                      isObject={false}
-                      onRemove={handleObjectivesOptionSelect}
-                      onSelect={  handleObjectivesOptionSelect}
-                      options={ objectives }
-                      required = {true} 
-                                    
-
-                      showCheckbox
-                      />   
-                      
-          
+        <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plan Title</h5>
+        <input
+          required 
+          type="text"
+          className="form-control"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+        />
+        <br></br>
+        <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Plan</h5>
+        <TextField
+          multiline
+          required
+          rows={4}
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          style ={{width:'100%'}}
+        />
+        <br></br>
+        <br></br>
+        <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Teammates Responsible</h5>
+        <Multiselect 
+          isObject={false}
+          onRemove={handleStudentOptionSelect}
+          onSelect={  handleStudentOptionSelect}
+          options={ studentOptions }
+          required = {true}               
+          showCheckbox
+        />   
+        <br></br>
+        <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Select Related Objectives</h5>   
+        <Multiselect
+          isObject={false}
+          onRemove={handleObjectivesOptionSelect}
+          onSelect={handleObjectivesOptionSelect}
+          options={objectives}
+          required={true}
+          showCheckbox
+        />   
         </Modal.Body>
         <Modal.Footer>
-         
           <Button variant="primary" type="submit" class="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          
         </Modal.Footer>
         </form>
       </Modal>
-
-
     </Fragment>
   );
 };

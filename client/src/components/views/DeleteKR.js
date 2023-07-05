@@ -1,33 +1,24 @@
 import React, { Fragment, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 
-
 const DeleteKR = ({ objective , updateData , kr }) => {
-    console.log("before check objective id is "+ objective.objective.objective_id);
-
-
     const deleteKR = async e => {
-        //e.preventDefault();
         try {
             console.log("objective id is "+ objective.objective.objective_id);
           const deleteKR = await fetch(`http://localhost:5000/objectives/${objective.objective.objective_id}/kr/${kr.kr_id}`, {
             method: "DELETE"
           });
-    
           updateData();
-          
         } catch (err) {
           console.error(err.message);
         }
       };
 
     return (
-        <Fragment>
-            
-            <button className="btn3 float-right" data-toggle="modal" data-target={`#krid${kr.kr_id}`}>
+              <Fragment>
+                <button className="btn3 float-right" data-toggle="modal" data-target={`#krid${kr.kr_id}`}>
                   <AiOutlineDelete style={{fontSize:'1.25rem', marginLeft:"1rem"}}></AiOutlineDelete>
-            </button>
-
+                </button>
                 <div class="modal fade" id={`krid${kr.kr_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -38,7 +29,6 @@ const DeleteKR = ({ objective , updateData , kr }) => {
                         </button>
                       </div>
                       <div class="modal-body">
-                        
                         Are you sure you want to delete this Key Result?
                       </div>
                       <div class="modal-footer">
@@ -48,7 +38,7 @@ const DeleteKR = ({ objective , updateData , kr }) => {
                     </div>
                   </div>
                 </div>
-        </Fragment>
+            </Fragment>
 
     );
 };

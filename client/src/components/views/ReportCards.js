@@ -1,28 +1,21 @@
 import { useState, useEffect } from "react";
 import "../css_components/ReportCards.css";
 
-
 function ReportCards() {
   const [cards, setCards] = useState([]);
-
   const getCards = async () => {
     try {
       const response = await fetch(`http://localhost:5000/1/pastweeklyreports/check`);
       const jsonData = await response.json();
-      
-
       setCards(jsonData);
     } catch (err) {
       console.error(err.message);
     }
   };
 
-  
-
   useEffect(() => {
     getCards();
   }, []);
-  console.log(cards);
 
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -34,7 +27,6 @@ function ReportCards() {
     <div>
       <section>
         <div className="container">
-          
           <div className="cards">
             {cards.length < 1 ? 
             (<>
@@ -54,11 +46,6 @@ function ReportCards() {
                 ))}
                 </>)}
                 </ul>
-                
-
-
-                {/*<p>{card.text}</p>*/}
-                
               </div>
             ))}</> }
           </div>

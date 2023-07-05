@@ -2,11 +2,10 @@ import React, { Fragment, useState } from "react";
 import TextField from '@mui/material/TextField';
 
 const AddObjective = () => {
-    const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  //edit description function
-
+//add objective function
   const addObjective = async e => {
     e.preventDefault();
     try {
@@ -19,13 +18,11 @@ const AddObjective = () => {
           body: JSON.stringify(body)
         }
       );
-
       window.location = "/MOKR";
     } catch (err) {
       console.error(err.message);
     }
   };
-//34 - data-target={`#id${id}`}  44 - id={`id${id+1}`}
 
   return (
     <Fragment>
@@ -37,14 +34,9 @@ const AddObjective = () => {
       >
         Add Row
       </button>
-
-      {/* 
-        id = id10
-      */}
       <div
         class="modal"
         id="exampleModalCenter1"
-        
       >
         <div class="modal-dialog">
           <div class="modal-content">
@@ -55,15 +47,12 @@ const AddObjective = () => {
                 type="button"
                 class="close"
                 data-dismiss="modal"
-                
               >
                 &times;
               </button>
             </div>
-
             <div class="modal-body">
-            
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Title</h5>
+              <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Title</h5>
               <input
               required 
                 type="text"
@@ -81,15 +70,12 @@ const AddObjective = () => {
                 onChange={e => setDescription(e.target.value)}
                 style ={{width:'100%'}}
                 />
-                
             </div>
-
             <div class="modal-footer">
               <button
                 type="submit"
                 class="btn btn1"
                 data-dismiss= {{description} && {title} ? "" : "modal"}
-                
               >
                 Save
               </button>

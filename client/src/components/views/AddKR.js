@@ -4,17 +4,17 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 const AddKR = ({ updateData , objective }) => {
-
   const [description, setDescription] = useState("");
   const [show, setShow] = useState(false);
 
-  const handleClose = () => {setShow(false);
-    setDescription("")};
+  const handleClose = () => {
+    setShow(false);
+    setDescription("")
+  };
+
   const handleShow = () => setShow(true);
 
-
-  //edit description function
-
+  //add key result function
   const addKR = async e => {
     e.preventDefault();
     try {
@@ -30,14 +30,10 @@ const AddKR = ({ updateData , objective }) => {
       );
       updateData();
       handleClose();
-      
-
-      //window.location = "/MOKR";
     } catch (err) {
       console.error(err.message);
     }
   };
-//34 - data-target={`#id${id}`}  44 - id={`id${id+1}`}
 
   return (
     <Fragment>
@@ -49,8 +45,7 @@ const AddKR = ({ updateData , objective }) => {
       >
         Add KR
       </button>
-
-        <Modal
+      <Modal
         show={show}
         onHide={handleClose}
         backdrop="static"
@@ -61,39 +56,24 @@ const AddKR = ({ updateData , objective }) => {
           <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Add New Key Result</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        
-          {/*<h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Key Result</h5>
-                <input
-                required 
-                  type="text"
-                  className="form-control"
-                  value={title}
-                  onChange={e => setTitle(e.target.value)}
-                />
-                <br></br>*/}
-                <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Key Result</h5>
-                <TextField
-                  multiline
-                  required
-                  rows={4}
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  style ={{width:'100%'}}
-                  />
-          
+            <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Description of Key Result</h5>
+            <TextField
+              multiline
+              required
+              rows={4}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              style ={{width:'100%'}}
+            />
         </Modal.Body>
         <Modal.Footer>
-         
           <Button variant="primary" type="submit" class="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          
         </Modal.Footer>
         </form>
       </Modal>
-
-      
     </Fragment>
   );
 };

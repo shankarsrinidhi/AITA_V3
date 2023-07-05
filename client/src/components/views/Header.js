@@ -1,39 +1,20 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-//import { icon } from '@fortawesome/fontawesome-svg-core/import.macro'
+import React, { useEffect, useState } from "react";
 import { FaBars } from "react-icons/fa";
-
 import pamplinlogo from '../logo-images/pamplin.png';
 
-
-
-const divStyle = {
-    color: 'red',
-    backgroundColor: 'blue',
-    fontSize: '24px'
-  };
-  
   const pamplin = {
-  
   width: '18rem',
   height: '5.5rem',
   padding: '0.75rem',
   align : 'center'
- 
-  };
-  
-
-
-    
+  }; 
 
 function Header() {
     const [teamName, setTeamName] = useState([]);
     const getTeamName = async () => {
-        
         try {
           const response = await fetch("http://localhost:5000/teamName");
           const jsonData = await response.json();
-    
           setTeamName(jsonData);
         } catch (err) {
           console.error(err.message);
@@ -43,8 +24,6 @@ function Header() {
       useEffect(() => {
         getTeamName();
       }, []);
-
-
 
   return (
     <header>

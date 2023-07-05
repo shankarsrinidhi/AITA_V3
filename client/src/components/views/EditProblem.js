@@ -1,52 +1,23 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState } from "react";
 import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { MdOutlineModeEditOutline } from "react-icons/md";
-import {Multiselect} from 'multiselect-react-dropdown';
 
 const EditProblem = ({ problem, refreshProblems }) => {
-  //console.log("in edit objective "+objective.objective.objective_id);
-  
   const [title, setTitle] = useState(problem.problem_title);
   const [description, setDescription] = useState(problem.description);
   const [mitigation, setMitigation] = useState(problem.mitigation);
-
-
-  
   const [show, setShow] = useState(false);
-  
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-
-  
-  const displayStudent = (student) => {
-    try {
-        const getstudentname = [];
-        for(let i=0; i<student.length; i++)
-    {
-      if (i==0) {getstudentname.push(student[0]);}
-      else{
-      getstudentname.push(", "+student[i]);}
-    }
-        
-          //return students;
-          //console.log("students value "+getstudentname);
-          return getstudentname;
-    } catch (error) {
-      console.error('Error fetching updated data:', error);
-    }
-  };
 
   const editProblems = async e => {
     e.preventDefault();
     
     try {
-       
         const body = { title, description, mitigation };
         const response = await fetch(
-          
           `http://localhost:5000/1/problems/editproblem/${problem.problem_id}`,
           {
             method: "PUT",
@@ -54,40 +25,29 @@ const EditProblem = ({ problem, refreshProblems }) => {
             body: JSON.stringify(body)
           }
         );
-        //refreshCompletedTasks();
-        //refreshUncompletedTasks();
-        refreshProblems();
+      refreshProblems();
       handleClose();
-      
     } catch (err) {
       console.error(err.message);
     }
   };
 
-
-
-
   return (
     <Fragment>
-        
-        <div style={{width:"95%"}} onClick={handleShow}>
-                          
-                            { problem.problem_title } 
-                          
+        <div style={{width:"95%"}} onClick={handleShow}>     
+          { problem.problem_title }       
         </div>
-        
         <Modal
         show={show}
         onHide={handleClose}
         backdrop="static"
         keyboard={false}
-      >
+        >
         <form onSubmit={editProblems}>
         <Modal.Header closeButton>
           <Modal.Title style={{color:'#8F0000', fontFamily: 'Lato'}}>Edit Problem</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        
                 <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Problem Title</h5>
                 <input
                 required 
@@ -105,35 +65,27 @@ const EditProblem = ({ problem, refreshProblems }) => {
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   style ={{width:'100%'}}
-                  />
+                />
                    <br></br>
                    <br></br>
                    <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Steps to be taken to mitigate the problem</h5>
-                <TextField
-                  multiline
-                  required
-                  rows={4}
-                  value={mitigation}
-                  onChange={e => setMitigation(e.target.value)}
-                  style ={{width:'100%'}}
+                  <TextField
+                    multiline
+                    required
+                    rows={4}
+                    value={mitigation}
+                    onChange={e => setMitigation(e.target.value)}
+                    style ={{width:'100%'}}
                   />
-                  
-                
-                      
-          
         </Modal.Body>
         <Modal.Footer>
-         
           <Button variant="primary" type="submit" class="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          
         </Modal.Footer>
         </form>
       </Modal>
-
-
     </Fragment>
   );
 };
