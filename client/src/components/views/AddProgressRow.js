@@ -23,12 +23,10 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
 
   const handleStudentOptionSelect = (event) => {
     setSelectedStudentOptions(event);
-    console.log("value of students "+selectedStudentOptions)
   };
 
   const handleObjectivesOptionSelect = (event) => {
     setSelectedObjectives(event);
-    console.log("value of objectives "+selectedObjectives);
   };
 
   useEffect(() => {
@@ -40,7 +38,6 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
       const getstudentname=[];
       const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
       const resData= await reqData.json();
-      console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
       getstudentname.push(resData[i].full_name);
@@ -56,7 +53,6 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
       const getobjectivetitle=[];
       const reqData= await fetch("http://localhost:5000/1/objectives");
       const resData= await reqData.json();
-      console.log(resData);
       for(let i=0; i<resData.length; i++)
     {
         getobjectivetitle.push(resData[i].objective_title);

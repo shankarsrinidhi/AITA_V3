@@ -1,12 +1,63 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 import HomePlannedTasks from "../views/HomePlannedTasks"
 import ReportCards from "../views/ReportCards";
 import Header from "../views/Header";
 import Footer from "../views/Footer";
+import { useAuth } from "../../contexts/AuthContext"
+import { TeamContext } from '../../contexts/TeamContext';
+import { useParams } from 'react-router-dom';
 
 export default function Home() {
+  const { team_id } = useParams();
   const [currentDate, setCurrentDate] = useState(new Date("Mon Feb 08 2022 05:30:00 GMT+0530 (India Standard Time)"));
   const [homeTasksRefreshCount, setHomeTasksRefreshCount] = useState(0);
+  const { currentUser, logout } = useAuth()
+  const [welcome, setWelcome] = useState(true);
+  const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
+  //const [teams, setTeams] = useState([]);
+
+  const getWelcome = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/userteam/${currentUser.email}`);
+      const jsonData = await response.json();
+      setWelcome(jsonData.result);
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    getWelcome();
+  }, []);
+
+  //add Problem function
+  const getTeams = async e => {
+    try {
+      const id =  currentUser.email;
+      const body = { id };
+      const response = await fetch(
+        `http://localhost:5000/teams`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        }
+      );
+      const jsonData = await response.json();
+      setTeams(jsonData);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+  
+  useEffect(() => {
+    getTeams();
+  },[]);
+console.log("teams in home"+teams);
+//console.log("count "+count);
+
+
 
 
   const refreshHomeTasks = () => {
@@ -52,11 +103,11 @@ export default function Home() {
   return(
   <Fragment>
     <div className='container'>
-      <Header/>
+      <Header team_id={ team_id !== "default" ? team_id : (teams?.length > 0 ?  teams[0]?.team_id : "default")}/>
       <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Home</h4>
       <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
     </div>
-    <div>
+    {teams.length>0 ?(<div>
       <div className='container'>
             <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Planned Tasks for this week</h4>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
@@ -66,9 +117,9 @@ export default function Home() {
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <ReportCards></ReportCards>
       </div>
-    </div>
+    </div>):(<h5 className="ml-3">Welcome! You are currently not added to any team. Please wait to be added or reach out to the admin</h5>)}
     <div>
-       <Footer />
+       <Footer team_id={team_id !== "default" ? team_id : (teams.length > 0 ?  teams[0].team_id : "default")}/>
     </div>         
   </Fragment>
   )

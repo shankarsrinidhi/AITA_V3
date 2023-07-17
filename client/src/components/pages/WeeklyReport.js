@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 import { AiFillCaretRight } from "react-icons/ai";
 import { AiFillCaretLeft } from "react-icons/ai";
 import '../css_components/WeeklyReport.css'
@@ -16,9 +16,12 @@ import AddPlan from "../views/AddPlan";
 import ProblemsList from "../views/ProblemsList";
 import AddProblem from "../views/AddProblem";
 import { useParams } from 'react-router-dom';
+import { useAuth } from "../../contexts/AuthContext"
+import { TeamContext } from '../../contexts/TeamContext';
   
 function WeeklyReport() {
-    const { week_start } = useParams();
+    
+    const { week_start, team_id } = useParams();
     const [currentDate, setCurrentDate] = useState(new Date(week_start));
     const [started,setStarted] = useState(false);
     const [submitted,setSubmitted] = useState(false);
@@ -29,6 +32,23 @@ function WeeklyReport() {
     const [additionalTasksRefreshCount, setAdditionalTasksRefreshCount] = useState(0);
     const [plansRefreshCount,setPlansRefreshCount] = useState(0);
     const [problemsRefreshCount,setProblemsRefreshCount] = useState(0);
+    const { currentUser, logout } = useAuth()
+    const [welcome, setWelcome] = useState(true);
+    const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
+
+    const getWelcome = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/userteam/${currentUser.email}`);
+        const jsonData = await response.json();
+        setWelcome(jsonData.result);
+      } catch (err) {
+        console.error(err.message);
+      }
+    };
+
+    useEffect(() => {
+      getWelcome();
+    }, []);
 
     const handleCloseError = () => setShowError(false);
 
@@ -220,14 +240,13 @@ function WeeklyReport() {
     return (
       <Fragment>
         <div className='container'>
-          <Header/>
-          <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Home</h4>
-          <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+          <Header team_id={ team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
+          
         </div>
         <div className='container'>
           <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Submit Weekly Report</h4>
           <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-          <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {teams.length>0 ? (<><div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button className = "btn1 float-left" onClick={handlePreviousWeek}><AiFillCaretLeft></AiFillCaretLeft>Prev</button>
             <h5 className="text-center mr-1 ml-1" style={{color:'#8F0000', fontFamily: 'Lato'}}>
               Week : {getWeekStartDate().toDateString()} - {getWeekEndDate().toDateString()}
@@ -281,9 +300,10 @@ function WeeklyReport() {
               <button style={{ borderRadius: '50px', padding: '10px 20px' , margin:'3rem'}} onClick={startReport}>Start this week's report</button>
             </div>
             </>)}
+        </>) : (<h5 className="ml-3">Welcome! You are currently not added to any team. Please wait to be added or reach out to the admin</h5>)}
         </div>
         <div>
-          <Footer />
+          <Footer team_id={team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
         </div>
         <Modal
           show={showSuccess}

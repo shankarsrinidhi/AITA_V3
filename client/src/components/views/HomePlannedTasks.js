@@ -151,8 +151,8 @@ function HomePlannedTasks({ refreshHomeTasks, week_start, week_end, prevweek_sta
                     <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 className="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                         </div>

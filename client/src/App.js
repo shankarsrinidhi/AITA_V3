@@ -1,12 +1,9 @@
-import React, { Fragment } from "react";
-import { Container, AppBar, Typography, Grow, Grid } from '@mui/material';
-import Header from "./components/views/Header";
+import React, { useState, Fragment } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
+import PrivateRoutes from "./routes/PrivateRoutes";
 
 //components
-
-import Footer from "./components/views/Footer";
 import { Route, Routes } from "react-router-dom";
 import MOKR from "./components/pages/MOKR";
 import WeeklyReport from "./components/pages/WeeklyReport";
@@ -15,10 +12,23 @@ import SignUp from "./components/pages/SignUp";
 import LogIn from "./components/pages/LogIn";
 
 import { AuthProvider } from "./contexts/AuthContext";
+import ForgotPassword from "./components/pages/ForgotPassword";
+import { useAuth } from "./contexts/AuthContext";
+import { TeamProvider } from "./contexts/TeamContext";
+import  { useContext, useEffect } from 'react';
+import { TeamContext } from './contexts/TeamContext';
+
 
 function App() {
+
+ 
+
+  
+
+
   return (
     <AuthProvider>
+      <TeamProvider>
     <Fragment>
       
           
@@ -29,10 +39,12 @@ function App() {
       <Routes>
          <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/weeklyReport/:week_start" element={<WeeklyReport />} />
           
-          <Route path="/MOKR" element={<MOKR />} />
+          <Route path="/home/:team_id" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
+          <Route path="/weeklyReport/:week_start/team/:team_id" element={<PrivateRoutes> <WeeklyReport /> </PrivateRoutes>} />
+          <Route path="/MOKR" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
+         
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
         
         
@@ -41,6 +53,7 @@ function App() {
      
       
     </Fragment>
+    </TeamProvider>
     </AuthProvider>
   );
 }

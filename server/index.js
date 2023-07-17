@@ -7,12 +7,90 @@ const pool = require("./db");
 app.use(cors());
 app.use(express.json());
 
+var session = require('express-session');
+var CASAuthentication = require('cas-authentication');
+
+app.use( session({
+    secret            : 'super secret key',
+    resave            : false,
+    saveUninitialized : true
+}));
+
+// Create a new instance of CASAuthentication.
+var cas = new CASAuthentication({
+    cas_url     : 'https://casserver.herokuapp.com/cas',
+    service_url : 'https://4405-2607-b400-2-ef40-00-1040.ngrok-free.app'
+});
+
+
+
+
+
+// Unauthenticated clients will be redirected to the CAS login and then back to
+// this route once authenticated.
+app.get( '/app', function ( req, res ) {
+    res.send( '<html><body>App Home - No Login Needed!<br>Go to <a href="' + 'https://4405-2607-b400-2-ef40-00-1040.ngrok-free.app/' + 'authenticate?returnTo=' + 'http://localhost:3000/MOKR' + '">login</a>.</body></html>' );
+});
+
+
+
+// Unauthenticated clients will be redirected to the CAS login and then back to
+// this route once authenticated.
+app.get( '/app1', cas.bounce, function ( req, res ) {
+   // res.send( '<html><body>Hello!</body></html>' );
+    res.redirect('http://localhost:3000/MOKR');
+});
+
+app.get( '/', cas.bounce, function ( req, res ) {
+    // res.send( '<html><body>Hello!</body></html>' );
+     res.redirect('http://localhost:3000/login');
+ });
+
+ app.get('/api/data', cas.bounce, (req, res) => {
+    // Retrieve authenticated user information
+    const user = req.session[cas.session_info];
+    res.json({ user });
+  });
+
+// Unauthenticated clients will receive a 401 Unauthorized response instead of
+// the JSON data.
+app.get( '/api', cas.block, function ( req, res ) {
+    res.json( { success: true } );
+});
+
+// An example of accessing the CAS user session variable. This could be used to
+// retrieve your own local user records based on authenticated CAS username.
+app.get( '/api/user', cas.block, function ( req, res ) {
+    res.json( { cas_user: req.session[ cas.session_name ] } );
+});
+
+// Unauthenticated clients will be redirected to the CAS login and then to the
+// provided "redirectTo" query parameter once authenticated.
+app.get( '/authenticate', cas.bounce_redirect );
+
+// This route will de-authenticate the client with the Express server and then
+// redirect the client to the CAS logout page.
+app.get( '/logout', cas.logout );
+
+const isAuthenticated = (req, res, next) => {
+    if (req.session && req.session.cas_user) {
+      // User is authenticated
+      next();
+    } else {
+      // User is not authenticated
+      res.sendStatus(401);
+      //res.redirect('http://localhost:3000/login') // Unauthorized status
+    }
+  };
+
+
+
 //routes 
 
 //post routes
 
 //post new objective
-app.post("/:project_id/objectives", async(req,res)=>{
+app.post("/:project_id/objectives",  async(req,res)=>{
     try {
         const { project_id } = req.params;
         const { title, description } = req.body;
@@ -24,7 +102,7 @@ app.post("/:project_id/objectives", async(req,res)=>{
 });
 
 //post new Key result
-app.post("/objectives/:objective_id/kr", async(req,res)=>{
+app.post("/objectives/:objective_id/kr",  async(req,res)=>{
     try {
         const { objective_id } = req.params;
         const { description } = req.body;
@@ -53,7 +131,6 @@ app.post("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
 //Post new plan
 app.post("/:project_id/report/:start_date/:end_date/plan", async(req,res)=>{
     try {
-       // console.log(req.body);
         const { project_id } = req.params;
         const { start_date , end_date } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
@@ -105,11 +182,26 @@ app.post("/student/new", async(req,res)=>{
 
 //Get routes 
 
+//Get team ids for a given user
+//SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = 'shankar@gmail.com' GROUP BY st.team_id;
+
+app.post("/teams", async(req,res)=>{
+    try {
+        console.log(req.body);
+        const { id } = req.body;
+        const teams =  await pool.query("SELECT team_name, team_id FROM team WHERE team_id IN (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) ORDER BY team_id",[id]);
+        res.json(teams.rows);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
 //Get team name details to display on the header
-app.get("/teamName", async(req,res)=>{
+app.get("/:id/teamName",  async(req,res)=>{
     try {
         const { id } = req.params;
-        const teamName =  await pool.query("SELECT team_name FROM Team WHERE team_id = 1");
+        const teamName =  await pool.query("SELECT team_name FROM Team WHERE team_id = $1",[id]);
         res.json(teamName.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -260,7 +352,6 @@ app.get("/:project_id/report/:start_date/:end_date/plans", async(req,res)=>{
         const { end_date } = req.params;
         const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2",[start_date,end_date]);
         res.json(prog.rows);
-        console.log(prog.rows[0]);
     } catch (err) {
         console.error(err.message);
     }
@@ -322,6 +413,17 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
             const { end_date } = req.params; 
             const isWRSubmitted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND project_id = $3 AND submitted_on IS NOT NULL) AS result",[start_date, end_date, project_id]);
             res.json(isWRSubmitted.rows[0]);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // to check if user is part of any team
+    app.get("/userteam/:email", async(req,res)=>{
+        try {
+            const { email } = req.params;
+            const userTeam =  await pool.query("SELECT EXISTS (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) AS result",[email]);
+            res.json(userTeam.rows[0]);
         } catch (err) {
             console.error(err.message);
         }

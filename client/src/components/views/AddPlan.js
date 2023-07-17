@@ -54,7 +54,6 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
       const getobjectivetitle=[];
       const reqData= await fetch("http://localhost:5000/1/objectives");
       const resData= await reqData.json();
-      console.log(resData);
       for(let i=0; i<resData.length; i++)
       {
           getobjectivetitle.push(resData[i].objective_title);
