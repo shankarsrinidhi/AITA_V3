@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-const AddKR = ({ updateData , objective }) => {
+const AddKR = ({ team_id, updateData , objective }) => {
   const [description, setDescription] = useState("");
   const [show, setShow] = useState(false);
 

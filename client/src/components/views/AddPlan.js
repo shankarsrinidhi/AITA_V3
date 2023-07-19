@@ -101,7 +101,7 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
     <Fragment>  
       <button
         type="button"
-        class="btn btn1 float-right"
+        className="btn btn1 float-right"
         onClick={handleShow}
         style={{ float: 'right'}}
       >
@@ -159,7 +159,7 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
                       />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit" class="btn btn1">Save</Button>
+          <Button variant="primary" type="submit" className="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

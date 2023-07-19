@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
 import TextField from '@mui/material/TextField';
 
-const AddObjective = () => {
+const AddObjective = ({team_id}) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -11,14 +11,14 @@ const AddObjective = () => {
     try {
       const body = { title, description };
       const response = await fetch(
-        `http://localhost:5000/1/objectives`,
+        `http://localhost:5000/${team_id}/objectives`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      window.location = "/MOKR";
+      window.location = `/MOKR/${team_id}`;
     } catch (err) {
       console.error(err.message);
     }
@@ -28,30 +28,30 @@ const AddObjective = () => {
     <Fragment>
       <button
         type="button"
-        class="btn btn1 float-right"
+        className="btn btn1 float-right"
         data-toggle="modal"
         data-target="#exampleModalCenter1"
       >
         Add Row
       </button>
       <div
-        class="modal"
+        className="modal"
         id="exampleModalCenter1"
       >
-        <div class="modal-dialog">
-          <div class="modal-content">
+        <div className="modal-dialog">
+          <div className="modal-content">
             <form onSubmit={addObjective}>
-            <div class="modal-header">
-              <h4 class="modal-title" style={{color:'#8F0000', fontFamily: 'Lato'}}>Add Objective</h4>
+            <div className="modal-header">
+              <h4 className="modal-title" style={{color:'#8F0000', fontFamily: 'Lato'}}>Add Objective</h4>
               <button
                 type="button"
-                class="close"
+                className="close"
                 data-dismiss="modal"
               >
                 &times;
               </button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               <h5 style={{color:'#8F0000', fontFamily: 'Lato'}}>Title</h5>
               <input
               required 
@@ -71,17 +71,17 @@ const AddObjective = () => {
                 style ={{width:'100%'}}
                 />
             </div>
-            <div class="modal-footer">
+            <div className="modal-footer">
               <button
                 type="submit"
-                class="btn btn1"
+                className="btn btn1"
                 data-dismiss= {{description} && {title} ? "" : "modal"}
               >
                 Save
               </button>
               <button
                 type="button"
-                class="btn btn-danger"
+                className="btn btn-danger"
                 data-dismiss="modal"
                 onClick={() => {setDescription(""); setTitle("")}}
               >

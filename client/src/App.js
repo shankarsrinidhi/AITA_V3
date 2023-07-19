@@ -42,7 +42,7 @@ function App() {
           
           <Route path="/home/:team_id" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
           <Route path="/weeklyReport/:week_start/team/:team_id" element={<PrivateRoutes> <WeeklyReport /> </PrivateRoutes>} />
-          <Route path="/MOKR" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
+          <Route path="/MOKR/:team_id" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
          
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>

@@ -90,11 +90,11 @@ const isAuthenticated = (req, res, next) => {
 //post routes
 
 //post new objective
-app.post("/:project_id/objectives",  async(req,res)=>{
+app.post("/:team_id/objectives",  async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { title, description } = req.body;
-        const newObjective = await pool.query("INSERT INTO objective (objective_title, description, project_id) VALUES($1,$2,$3) RETURNING *",[title,description,project_id]);
+        const newObjective = await pool.query("INSERT INTO objective (objective_title, description, team_id) VALUES($1,$2,$3) RETURNING *",[title,description,team_id]);
         res.json(newObjective.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -115,13 +115,13 @@ app.post("/objectives/:objective_id/kr",  async(req,res)=>{
 
 
 //Post new progress row
-app.post("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
         const timestamp = new Date();
-        const newProg = await pool.query("INSERT INTO progress(progress_title, description, student, related_objectives, completed_on, report_id) VALUES($1,$2,$3,$4,$5,(SELECT report_id FROM weeklyreport WHERE week_start_date = $6 AND week_end_date = $7 AND project_id = $8)) RETURNING *",[title, description, selectedStudentOptions, selectedObjectives, timestamp, start_date, end_date, project_id]);
+        const newProg = await pool.query("INSERT INTO progress(progress_title, description, student, related_objectives, completed_on, report_id) VALUES($1,$2,$3,$4,$5,(SELECT report_id FROM weeklyreport WHERE week_start_date = $6 AND week_end_date = $7 AND team_id = $8)) RETURNING *",[title, description, selectedStudentOptions, selectedObjectives, timestamp, start_date, end_date, team_id]);
         res.json(newProg.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -129,13 +129,13 @@ app.post("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
 });
 
 //Post new plan
-app.post("/:project_id/report/:start_date/:end_date/plan", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/plan", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
         const timestamp = new Date();
-        const newPlan = await pool.query("INSERT INTO plan(plan_title, description, student, related_objectives, report_id) VALUES($1,$2,$3,$4,(SELECT report_id FROM weeklyreport WHERE week_start_date = $5 AND week_end_date = $6 AND project_id = $7)) RETURNING *",[title, description, selectedStudentOptions, selectedObjectives, start_date, end_date, project_id]);
+        const newPlan = await pool.query("INSERT INTO plan(plan_title, description, student, related_objectives, report_id) VALUES($1,$2,$3,$4,(SELECT report_id FROM weeklyreport WHERE week_start_date = $5 AND week_end_date = $6 AND team_id = $7)) RETURNING *",[title, description, selectedStudentOptions, selectedObjectives, start_date, end_date, team_id]);
         res.json(newPlan.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -143,12 +143,12 @@ app.post("/:project_id/report/:start_date/:end_date/plan", async(req,res)=>{
 });
 
 //post new problem
-app.post("/:project_id/report/:start_date/:end_date/problem", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/problem", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
         const { title, description, mitigation, plan_id } = req.body;
-        const newProblem = await pool.query("INSERT INTO problem(problem_title, description, mitigation, plan_id, report_id) VALUES($1,$2,$3,$4,(SELECT report_id FROM weeklyreport WHERE week_start_date = $5 AND week_end_date = $6 AND project_id = $7)) RETURNING *",[title, description, mitigation, plan_id, start_date, end_date, project_id]);
+        const newProblem = await pool.query("INSERT INTO problem(problem_title, description, mitigation, plan_id, report_id) VALUES($1,$2,$3,$4,(SELECT report_id FROM weeklyreport WHERE week_start_date = $5 AND week_end_date = $6 AND team_id = $7)) RETURNING *",[title, description, mitigation, plan_id, start_date, end_date, team_id]);
         res.json(newProblem.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -157,11 +157,11 @@ app.post("/:project_id/report/:start_date/:end_date/problem", async(req,res)=>{
 
 
 //post start weekly report
-app.post("/:project_id/startreport/:start_date/:end_date", async(req,res)=>{
+app.post("/:team_id/startreport/:start_date/:end_date", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
-        const startReport = await pool.query("INSERT INTO weeklyreport(week_start_date, week_end_date, project_id, started) VALUES($1,$2,$3,true) RETURNING *",[start_date , end_date, project_id]);
+        const startReport = await pool.query("INSERT INTO weeklyreport(week_start_date, week_end_date, team_id, started) VALUES($1,$2,$3,true) RETURNING *",[start_date , end_date, team_id]);
         res.json(startReport.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -183,11 +183,9 @@ app.post("/student/new", async(req,res)=>{
 //Get routes 
 
 //Get team ids for a given user
-//SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = 'shankar@gmail.com' GROUP BY st.team_id;
-
 app.post("/teams", async(req,res)=>{
     try {
-        console.log(req.body);
+       // console.log(req.body);
         const { id } = req.body;
         const teams =  await pool.query("SELECT team_name, team_id FROM team WHERE team_id IN (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) ORDER BY team_id",[id]);
         res.json(teams.rows);
@@ -201,7 +199,7 @@ app.post("/teams", async(req,res)=>{
 app.get("/:id/teamName",  async(req,res)=>{
     try {
         const { id } = req.params;
-        const teamName =  await pool.query("SELECT team_name FROM Team WHERE team_id = $1",[id]);
+        const teamName =  await pool.query("SELECT team_name FROM team WHERE team_id = $1",[id]);
         res.json(teamName.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -209,10 +207,10 @@ app.get("/:id/teamName",  async(req,res)=>{
 });
 
 //Get all objectives for a project
-app.get("/:project_id/objectives", async(req,res)=>{
+app.get("/:team_id/objectives", async(req,res)=>{
     try {
-        const { project_id } = req.params;
-        const todo =  await pool.query("SELECT * FROM objective WHERE project_id = $1",[project_id]);
+        const { team_id } = req.params;
+        const todo =  await pool.query("SELECT * FROM objective WHERE team_id = $1",[team_id]);
         res.json(todo.rows);
     } catch (err) {
         console.error(err.message);
@@ -220,10 +218,10 @@ app.get("/:project_id/objectives", async(req,res)=>{
 });
 
 //Get all the objectives with their corresponding key results
-app.get("/:project_id/objectives/check", async(req,res)=>{
+app.get("/:team_id/objectives/check", async(req,res)=>{
     try {
-        const { project_id } = req.params;
-        const todo =  await pool.query("SELECT jsonb_build_object( 'objective_id', o.objective_id, 'objective_title', o.objective_title, 'description', o.description, 'keyresults', jsonb_agg(jsonb_build_object('kr_id', k.kr_id,'key_result', k.key_result))) AS objective FROM objective o LEFT JOIN keyresult k ON o.objective_id = k.objective_id WHERE o.project_id = $1 GROUP BY o.objective_id ORDER BY o.objective_id",[project_id]);
+        const { team_id } = req.params;
+        const todo =  await pool.query("SELECT jsonb_build_object( 'objective_id', o.objective_id, 'objective_title', o.objective_title, 'description', o.description, 'keyresults', jsonb_agg(jsonb_build_object('kr_id', k.kr_id,'key_result', k.key_result))) AS objective FROM objective o LEFT JOIN keyresult k ON o.objective_id = k.objective_id WHERE o.team_id = $1 GROUP BY o.objective_id ORDER BY o.objective_id",[team_id]);
         res.json(todo.rows);
     } catch (err) {
         console.error(err.message);
@@ -232,10 +230,10 @@ app.get("/:project_id/objectives/check", async(req,res)=>{
 
 
 //get details for home page display past weekly reports cards
-app.get("/:project_id/pastweeklyreports/check", async(req,res)=>{
+app.get("/:team_id/pastweeklyreports/check", async(req,res)=>{
     try {
-        const { project_id } = req.params;
-        const todo =  await pool.query("SELECT jsonb_build_object( 'report_id', r.report_id, 'week_start_date', r.week_start_date, 'week_end_date', r.week_end_date, 'submitted_on', r.submitted_on, 'project_id', r.project_id, 'started', r.started, 'progress', jsonb_agg(jsonb_build_object('progress_id', p.progress_id, 'progress_title', p.progress_title))) AS report FROM weeklyreport r LEFT JOIN progress p ON r.report_id = p.report_id WHERE r.project_id = $1 AND r.submitted_on IS NOT NULL GROUP BY r.report_id ORDER BY r.week_start_date DESC",[project_id]);
+        const { team_id } = req.params;
+        const todo =  await pool.query("SELECT jsonb_build_object( 'report_id', r.report_id, 'week_start_date', r.week_start_date, 'week_end_date', r.week_end_date, 'submitted_on', r.submitted_on, 'team_id', r.team_id, 'started', r.started, 'progress', jsonb_agg(jsonb_build_object('progress_id', p.progress_id, 'progress_title', p.progress_title))) AS report FROM weeklyreport r LEFT JOIN progress p ON r.report_id = p.report_id WHERE r.team_id = $1 AND r.submitted_on IS NOT NULL GROUP BY r.report_id ORDER BY r.week_start_date DESC",[team_id]);
         res.json(todo.rows);
     } catch (err) {
         console.error(err.message);
@@ -243,10 +241,10 @@ app.get("/:project_id/pastweeklyreports/check", async(req,res)=>{
 });
 
 // check for MOKR submission
-app.get("/:project_id/isMOKRSubmitted", async(req,res)=>{
+app.get("/:team_id/isMOKRSubmitted", async(req,res)=>{
     try {
         const { id } = req.params;
-        const mokrSubmitted =  await pool.query("SELECT mokrsubmitted FROM project WHERE project_id = $1",[id]);
+        const mokrSubmitted =  await pool.query("SELECT mokrsubmitted FROM project WHERE team_id = $1",[id]);
         res.json(mokrSubmitted.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -255,10 +253,10 @@ app.get("/:project_id/isMOKRSubmitted", async(req,res)=>{
 
 
 //mission of the project
-app.get("/:project_id/mission", async(req,res)=>{
+app.get("/:team_id/mission", async(req,res)=>{
     try {
-        const { project_id } = req.params;
-        const mission =  await pool.query("SELECT mission FROM project WHERE project_id = $1",[project_id]);
+        const { team_id } = req.params;
+        const mission =  await pool.query("SELECT mission FROM team WHERE team_id = $1",[team_id]);
         res.json(mission.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -266,11 +264,11 @@ app.get("/:project_id/mission", async(req,res)=>{
 });
 
 //get details of the progress 
-app.get("/:project_id/report/:report_id/progress", async(req,res)=>{
+app.get("/:team_id/report/:report_id/progress", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { report_id } = req.params;
-        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.report_id, p.related_objectives, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.report_id = $1",[report_id]);
+        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.report_id, p.related_objectives, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.report_id = $1 AND w.team_id = $2",[report_id, team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -278,12 +276,12 @@ app.get("/:project_id/report/:report_id/progress", async(req,res)=>{
 });
 
 
-app.get("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params;
-        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2",[start_date,end_date]);
+        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.team_id = $3",[start_date,end_date, team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -291,12 +289,12 @@ app.get("/:project_id/report/:start_date/:end_date/progress", async(req,res)=>{
 });
 
 //get progress details of plans from past week that is completed (to display in completed plans section)
-app.get("/:project_id/report/:start_date/:end_date/completedplans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/completedplans", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params;
-        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = true ",[start_date,end_date]);
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = true AND w.team_id = $3",[start_date,end_date, team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -304,12 +302,12 @@ app.get("/:project_id/report/:start_date/:end_date/completedplans", async(req,re
 });
 
 //get plans details from past week that have not been marked complete (to display in uncompleted plans section)
-app.get("/:project_id/report/:start_date/:end_date/uncompletedplans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/uncompletedplans", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params; 
-        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = false AND w.project_id = $3",[start_date,end_date,project_id]);
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.marked_complete = false AND w.team_id = $3",[start_date,end_date,team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -317,12 +315,12 @@ app.get("/:project_id/report/:start_date/:end_date/uncompletedplans", async(req,
 });
 
 //to get list of all planned tasks to be displayed on the home screen
-app.get("/:project_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>{
+app.get("/:team_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params; 
-        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.project_id = $3",[start_date,end_date,project_id]);
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.team_id = $3",[start_date,end_date,team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -331,12 +329,12 @@ app.get("/:project_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>
 
 
 //To display additional completed tasks in weekly report page
-app.get("/:project_id/report/:start_date/:end_date/additionalprogress", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/additionalprogress", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params; 
-        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.plan_id, w.report_id, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.plan_id IS null",[start_date,end_date]);
+        const prog =  await pool.query("SELECT p.progress_id, p.progress_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.plan_id, w.report_id, w.week_start_date, w.week_end_date FROM progress p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND p.plan_id IS null AND w.team_id = $3",[start_date,end_date,team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -345,12 +343,12 @@ app.get("/:project_id/report/:start_date/:end_date/additionalprogress", async(re
 
 
 //to display current week plans in plans section
-app.get("/:project_id/report/:start_date/:end_date/plans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/plans", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params;
-        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2",[start_date,end_date]);
+        const prog =  await pool.query("SELECT p.plan_id, p.plan_title, p.description, p.student, p.related_objectives, p.assumption, p.completed_on, p.marked_complete, w.report_id, w.week_start_date, w.week_end_date FROM plan p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.team_id = $3",[start_date,end_date,team_id]);
         res.json(prog.rows);
     } catch (err) {
         console.error(err.message);
@@ -358,12 +356,12 @@ app.get("/:project_id/report/:start_date/:end_date/plans", async(req,res)=>{
 });
 
 //to display problems in problems section of weekly report page
-app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date } = req.params;
         const { end_date } = req.params;
-        const prob =  await pool.query("SELECT p.problem_id, p.problem_title, p.description, p.mitigation, p.plan_id, w.report_id, w.week_start_date, w.week_end_date FROM problem p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.project_id = $3",[start_date,end_date,project_id]);
+        const prob =  await pool.query("SELECT p.problem_id, p.problem_title, p.description, p.mitigation, p.plan_id, w.report_id, w.week_start_date, w.week_end_date FROM problem p JOIN weeklyreport w ON p.report_id = w.report_id WHERE w.week_start_date = $1 AND w.week_end_date = $2 AND w.team_id = $3",[start_date,end_date,team_id]);
         res.json(prob.rows);
     } catch (err) {
         console.error(err.message);
@@ -371,10 +369,10 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
 });
 
 //for select dropdown population
-    app.get("/:project_id/studentsdropdown", async(req,res)=>{
+    app.get("/:team_id/studentsdropdown", async(req,res)=>{
         try {
-            const { project_id } = req.params;
-            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM student");
+            const { team_id } = req.params;
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM student s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1",[team_id]);
             res.json(students.rows);
         } catch (err) {
             console.error(err.message);
@@ -393,12 +391,12 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
 
 
     // to check if weekly report is started
-        app.get("/:project_id/reportstarted/:start_date/:end_date", async(req,res)=>{
+        app.get("/:team_id/reportstarted/:start_date/:end_date", async(req,res)=>{
         try {
-            const { project_id } = req.params;
+            const { team_id } = req.params;
             const { start_date } = req.params;
             const { end_date } = req.params; 
-            const isWRStarted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND project_id = $3) AS result",[start_date, end_date, project_id]);
+            const isWRStarted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND team_id = $3) AS result",[start_date, end_date, team_id]);
             res.json(isWRStarted.rows[0]);
         } catch (err) {
             console.error(err.message);
@@ -406,12 +404,12 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
     });
 
     // to check if weekly report is submitted
-    app.get("/:project_id/reportsubmitted/:start_date/:end_date", async(req,res)=>{
+    app.get("/:team_id/reportsubmitted/:start_date/:end_date", async(req,res)=>{
         try {
-            const { project_id } = req.params;
+            const { team_id } = req.params;
             const { start_date } = req.params;
             const { end_date } = req.params; 
-            const isWRSubmitted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND project_id = $3 AND submitted_on IS NOT NULL) AS result",[start_date, end_date, project_id]);
+            const isWRSubmitted =  await pool.query("SELECT EXISTS (SELECT 1 FROM weeklyreport WHERE week_start_date = $1 AND week_end_date = $2 AND team_id = $3 AND submitted_on IS NOT NULL) AS result",[start_date, end_date, team_id]);
             res.json(isWRSubmitted.rows[0]);
         } catch (err) {
             console.error(err.message);
@@ -433,11 +431,11 @@ app.get("/:project_id/report/:start_date/:end_date/problems", async(req,res)=>{
 //put routes
 
 //add mission details
-app.put("/:project_id/mission", async(req,res)=>{
+app.put("/:team_id/mission", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { mission } = req.body;
-        const addMission = await pool.query("UPDATE project SET  mission = ($1) WHERE project_id = ($2)",[mission,project_id]);
+        const addMission = await pool.query("UPDATE team SET  mission = ($1) WHERE team_id = ($2)",[mission,team_id]);
         res.json(addMission.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -446,12 +444,12 @@ app.put("/:project_id/mission", async(req,res)=>{
 
 
 //update objective row on click of the edit pencil icon
-app.put("/:project_id/objectives/:objective_id", async(req,res)=>{
+app.put("/:team_id/objectives/:objective_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { objective_id } = req.params;
         const { title, description } = req.body;
-        const editObjective = await pool.query("UPDATE objective SET objective_title = ($1), description = ($2) WHERE objective_id = ($3) AND project_id = ($4)",[title,description,objective_id,project_id]);
+        const editObjective = await pool.query("UPDATE objective SET objective_title = ($1), description = ($2) WHERE objective_id = ($3) AND team_id = ($4)",[title,description,objective_id,team_id]);
         res.json(editObjective.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -473,9 +471,9 @@ app.put("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
 });
 
 //to mark as incomplete from progress section
-app.put("/:project_id/progress/markasincomplete/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/markasincomplete/:plan_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { plan_id } = req.params;
         const { plan_title } = req.body;
         const markIncomplete = await pool.query("UPDATE plan SET marked_complete = false, completed_on = null WHERE plan_id = ($1)",[plan_id]);
@@ -487,15 +485,15 @@ app.put("/:project_id/progress/markasincomplete/:plan_id", async(req,res)=>{
 });
 
 //to mark previous week's plan as complete from progress section
-app.put("/:project_id/progress/:plan_id/markascomplete/:start_date/:end_date", async(req,res)=>{
+app.put("/:team_id/progress/:plan_id/markascomplete/:start_date/:end_date", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
         const { plan_id } = req.params;
         const { plan_title, description, student, related_objectives } = req.body;
         const timestamp =  new Date();
         const markcomplete = await pool.query("UPDATE plan SET marked_complete = true, completed_on = $1 WHERE plan_id = ($2)",[timestamp, plan_id]);
-        const addProgress = await pool.query("INSERT INTO progress (progress_title, description, student, related_objectives, completed_on, plan_id, report_id) VALUES ($1, $2, $3, $4, $5,$6,(SELECT report_id FROM weeklyreport WHERE week_start_date = $7 AND week_end_date = $8 AND project_id = $9)) RETURNING *",[plan_title, description, student, related_objectives, timestamp, plan_id,start_date,end_date,project_id]);
+        const addProgress = await pool.query("INSERT INTO progress (progress_title, description, student, related_objectives, completed_on, plan_id, report_id) VALUES ($1, $2, $3, $4, $5,$6,(SELECT report_id FROM weeklyreport WHERE week_start_date = $7 AND week_end_date = $8 AND team_id = $9)) RETURNING *",[plan_title, description, student, related_objectives, timestamp, plan_id,start_date,end_date,team_id]);
         res.json(markcomplete.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -503,9 +501,9 @@ app.put("/:project_id/progress/:plan_id/markascomplete/:start_date/:end_date", a
 });
 
 //to edit the progress from completed plans section
-app.put("/:project_id/progress/editcompletedplan/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/editcompletedplan/:plan_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { plan_id } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
         const timestamp =  new Date();
@@ -518,9 +516,9 @@ app.put("/:project_id/progress/editcompletedplan/:plan_id", async(req,res)=>{
 });
 
 // to edit additional progress
-app.put("/:project_id/progress/editadditionalprogress/:progress_id", async(req,res)=>{
+app.put("/:team_id/progress/editadditionalprogress/:progress_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { progress_id } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
         const timestamp =  new Date();
@@ -532,9 +530,9 @@ app.put("/:project_id/progress/editadditionalprogress/:progress_id", async(req,r
 });
 
 //edit plans
-app.put("/:project_id/plans/editplan/:plan_id", async(req,res)=>{
+app.put("/:team_id/plans/editplan/:plan_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { plan_id } = req.params;
         const { title, description, selectedStudentOptions, selectedObjectives } = req.body;
         const timestamp =  new Date();
@@ -547,9 +545,9 @@ app.put("/:project_id/plans/editplan/:plan_id", async(req,res)=>{
 
 
 //edit problems
-app.put("/:project_id/problems/editproblem/:problem_id", async(req,res)=>{
+app.put("/:team_id/problems/editproblem/:problem_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { problem_id } = req.params;
         const { title, description, mitigation } = req.body;
         const timestamp =  new Date();
@@ -562,12 +560,12 @@ app.put("/:project_id/problems/editproblem/:problem_id", async(req,res)=>{
 
 
 //mark weekly report as submitted
-app.put("/:project_id/submitreport/:start_date/:end_date", async(req,res)=>{
+app.put("/:team_id/submitreport/:start_date/:end_date", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { start_date , end_date } = req.params;
         const timestamp = new Date();
-        const submitReport = await pool.query("UPDATE weeklyreport SET submitted_on = $1 WHERE week_start_date = $2 AND week_end_date = $3 AND project_id = $4",[timestamp, start_date , end_date, project_id]);
+        const submitReport = await pool.query("UPDATE weeklyreport SET submitted_on = $1 WHERE week_start_date = $2 AND week_end_date = $3 AND team_id = $4",[timestamp, start_date , end_date, team_id]);
         res.json(submitReport.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -576,9 +574,9 @@ app.put("/:project_id/submitreport/:start_date/:end_date", async(req,res)=>{
 
 
 //delete/remove from the screen the plan of a previous week from progress section
-app.put("/:project_id/progress/remove/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/remove/:plan_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { plan_id } = req.params;
         const removePlan = await pool.query("UPDATE plan SET marked_complete = null, completed_on = null WHERE plan_id = ($1)",[plan_id]);
         res.json(removePlan.rows[0]);
@@ -590,12 +588,12 @@ app.put("/:project_id/progress/remove/:plan_id", async(req,res)=>{
 //delete routes
 
 //delete objectives and KRs (check cascading)
-app.delete("/:project_id/objectives/:objective_id", async(req,res)=>{
+app.delete("/:team_id/objectives/:objective_id", async(req,res)=>{
     try {
-        const { project_id } = req.params;
+        const { team_id } = req.params;
         const { objective_id } = req.params;
         const deleteKR = await pool.query("DELETE from keyresult WHERE objective_id = $1",[objective_id]);
-        const deleteObjective = await pool.query("DELETE FROM objective WHERE objective_id = $1 AND project_id = $2",[objective_id,project_id]);
+        const deleteObjective = await pool.query("DELETE FROM objective WHERE objective_id = $1 AND team_id = $2",[objective_id,team_id]);
         res.json("Deleted");
     } catch (err) {
         console.error(err.message);
@@ -615,7 +613,7 @@ app.delete("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
 });
 
 //Delete Progress on click of dumpster icon in Additional Completed Tasks Section
-app.delete("/:project_id/report/progress/:progress_id", async(req,res)=>{
+app.delete("/:team_id/report/progress/:progress_id", async(req,res)=>{
     try {
         const { progress_id } = req.params;
         const deleteProg = await pool.query("DELETE from progress WHERE progress_id = $1",[progress_id]);
@@ -626,7 +624,7 @@ app.delete("/:project_id/report/progress/:progress_id", async(req,res)=>{
 });
 
 //delete plans
-app.delete("/:project_id/report/plan/:plan_id", async(req,res)=>{
+app.delete("/:team_id/report/plan/:plan_id", async(req,res)=>{
     try {
         const { plan_id } = req.params;
         const deletePlan = await pool.query("DELETE from plan WHERE plan_id = $1",[plan_id]);
@@ -637,7 +635,7 @@ app.delete("/:project_id/report/plan/:plan_id", async(req,res)=>{
 });
 
 //delete problem
-app.delete("/:project_id/report/problem/:problem_id", async(req,res)=>{
+app.delete("/:team_id/report/problem/:problem_id", async(req,res)=>{
     try {
         const { problem_id } = req.params;
         const deleteProblem = await pool.query("DELETE from problem WHERE problem_id = $1",[problem_id]);

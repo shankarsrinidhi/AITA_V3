@@ -32,9 +32,8 @@ const NavigationDropdown = () => {
 
   async function selectTeam(team){
     await setSelectedTeam(team);
-    setCount(count+1);
+
     window.location = `/home/${team.team_id}`;
-    //console.log("selected team onclick "+selectedTeam.team_name);
 
   }
 

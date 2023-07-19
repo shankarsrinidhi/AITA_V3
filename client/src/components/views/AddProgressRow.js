@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end }) => {
+const AddProgressRow = ({ team_id, refreshAdditionalCompletedTasks, week_start, week_end }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [studentOptions, setStudentOptions] = useState([]);
@@ -36,7 +36,7 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -51,7 +51,7 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch("http://localhost:5000/1/objectives");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -81,7 +81,7 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
     try {
       const body = { title, description, selectedStudentOptions, selectedObjectives };
       const response = await fetch(
-        `http://localhost:5000/1/report/${week_start}/${week_end}/progress`,
+        `http://localhost:5000/${team_id}/report/${week_start}/${week_end}/progress`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -99,7 +99,7 @@ const AddProgressRow = ({ refreshAdditionalCompletedTasks, week_start, week_end 
     <Fragment>
       <button
         type="button"
-        class="btn btn1 float-right"
+        className="btn btn1 float-right"
         onClick={handleShow}
         style={{ float: 'right', marginBottom:"1rem" }}
       >

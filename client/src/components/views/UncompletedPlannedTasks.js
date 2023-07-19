@@ -7,12 +7,12 @@ import '../css_components/DraggableCardList.css';
 import ReportProblem from "./ReportProblem";
 import EditUncompletedPlan from "./EditUncompletedPlan";
 
-function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, refreshProblems, week_start, week_end, prevweek_start, prevweek_end}) {
+function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompletedTasks, refreshProblems, week_start, week_end, prevweek_start, prevweek_end}) {
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${prevweek_start}/${prevweek_end}/uncompletedplans`);
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${prevweek_start}/${prevweek_end}/uncompletedplans`);
       const jsonData = await response.json();
       setProgress(jsonData);
     } catch (err) {
@@ -42,7 +42,7 @@ function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks
      try {
        const body = { plan_title, description, student, related_objectives};
        const response = await fetch(
-         `http://localhost:5000/1/progress/${plan_id}/markascomplete/${week_start}/${week_end}`,
+         `http://localhost:5000/${team_id}/progress/${plan_id}/markascomplete/${week_start}/${week_end}`,
          {
            method: "PUT",
            headers: { "Content-Type": "application/json" },
@@ -59,7 +59,7 @@ function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks
    const removePlan = async ({plan_id}) =>{
      try {
        const response = await fetch(
-         `http://localhost:5000/1/progress/remove/${plan_id}`,
+         `http://localhost:5000/${team_id}/progress/remove/${plan_id}`,
          {
            method: "PUT",
            headers: { "Content-Type": "application/json" },
@@ -95,8 +95,8 @@ function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditUncompletedPlan plan_id={plan_id} plan_title={plan_title} plan_description={description} student={student} related_objectives={related_objectives} refreshUncompletedTasks={refreshUncompletedTasks}></EditUncompletedPlan>
-                          <ReportProblem plan_id={plan_id} refreshProblems = {refreshProblems} week_start={week_start} week_end={week_end}></ReportProblem>
+                            <EditUncompletedPlan team_id={team_id} plan_id={plan_id} plan_title={plan_title} plan_description={description} student={student} related_objectives={related_objectives} refreshUncompletedTasks={refreshUncompletedTasks}></EditUncompletedPlan>
+                          <ReportProblem team_id={team_id} plan_id={plan_id} refreshProblems = {refreshProblems} week_start={week_start} week_end={week_end}></ReportProblem>
                           <button className = "btn3 float-right" onClick={() => markAsComplete({plan_id,plan_title, description, student, related_objectives})}><AiOutlineCheckCircle style={{fontSize:'1.25rem'}}></AiOutlineCheckCircle></button>
                           <button className = "btn3 float-right" data-toggle="modal" data-target={`#UPDelid${plan_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           </div>
@@ -104,21 +104,21 @@ function UncompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks
                       )}
                     </Draggable>
 
-                  <div class="modal fade" id={`UPDelid${plan_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <div className="modal fade" id={`UPDelid${plan_id}`} tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                        <h5 className="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                         </div>
-                        <div class="modal-body">
+                        <div className="modal-body">
                         Are you sure you want to delete this task?
                         </div>
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                        <button type="button" class="btn btn-primary" onClick={() => removePlan({plan_id})} data-dismiss="modal">Yes</button>
+                        <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-dismiss="modal">No</button>
+                        <button type="button" className="btn btn-primary" onClick={() => removePlan({plan_id})} data-dismiss="modal">Yes</button>
                         </div>
                     </div>
                     </div>

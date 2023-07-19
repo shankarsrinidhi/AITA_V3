@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditPlans = ({ plan, refreshPlans }) => {
+const EditPlans = ({ team_id, plan, refreshPlans }) => {
   const [title, setTitle] = useState(plan.plan_title);
   const [description, setDescription] = useState(plan.description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -31,7 +31,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -46,7 +46,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch("http://localhost:5000/1/objectives");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -90,7 +90,7 @@ const EditPlans = ({ plan, refreshPlans }) => {
     try {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
-          `http://localhost:5000/1/plans/editplan/${plan.plan_id}`,
+          `http://localhost:5000/${team_id}/plans/editplan/${plan.plan_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-const EditProblem = ({ problem, refreshProblems }) => {
+const EditProblem = ({ team_id, problem, refreshProblems }) => {
   const [title, setTitle] = useState(problem.problem_title);
   const [description, setDescription] = useState(problem.description);
   const [mitigation, setMitigation] = useState(problem.mitigation);
@@ -18,7 +18,7 @@ const EditProblem = ({ problem, refreshProblems }) => {
     try {
         const body = { title, description, mitigation };
         const response = await fetch(
-          `http://localhost:5000/1/problems/editproblem/${problem.problem_id}`,
+          `http://localhost:5000/${team_id}/problems/editproblem/${problem.problem_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

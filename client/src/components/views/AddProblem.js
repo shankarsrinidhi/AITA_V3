@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-const AddProblem = ({ refreshProblems, week_start, week_end }) => {
+const AddProblem = ({ team_id, refreshProblems, week_start, week_end }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [mitigation, setMitigation] = useState("");
@@ -24,7 +24,7 @@ const AddProblem = ({ refreshProblems, week_start, week_end }) => {
     try {
       const body = { title, description, mitigation };
       const response = await fetch(
-        `http://localhost:5000/1/report/${week_start}/${week_end}/problem`,
+        `http://localhost:5000/${team_id}/report/${week_start}/${week_end}/problem`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -42,7 +42,7 @@ const AddProblem = ({ refreshProblems, week_start, week_end }) => {
     <Fragment>
       <button
         type="button"
-        class="btn btn1 float-right"
+        className="btn btn1 float-right"
         onClick={handleShow}
         style={{ float: 'right'}}
       >
@@ -90,7 +90,7 @@ const AddProblem = ({ refreshProblems, week_start, week_end }) => {
                   />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit" class="btn btn1">Save</Button>
+          <Button variant="primary" type="submit" className="btn btn1">Save</Button>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

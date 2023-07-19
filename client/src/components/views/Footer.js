@@ -25,7 +25,7 @@ const Footer = ({team_id}) => {
                 <i className="material-icons nav__icon">add_circle</i>
                 <span className="nav__text">Weekly Report</span>
             </CustomLink>
-            <CustomLink to="/MOKR">
+            <CustomLink to={`/MOKR/${team_id}`}>
                 <i className="material-icons nav__icon">key</i>
                 <span className="nav__text">MOKR</span>
             </CustomLink>

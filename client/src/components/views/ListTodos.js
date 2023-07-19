@@ -6,13 +6,13 @@ import DeleteObjective from "./DeleteObjective";
 import EditKR from "./EditKR";
 import DeleteKR from "./DeleteKR";
 
-const ListTodos = () => {
+const ListTodos = ({team_id}) => {
   const [objectives, setObjectives] = useState([]);
   const [krShown, setKrShown] = useState([]);
 
   const getObjectives = async () => {
     try {
-      const response = await fetch("http://localhost:5000/1/objectives/check");
+      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`);
       const jsonData = await response.json();
       setObjectives(jsonData);
     } catch (err) {
@@ -26,7 +26,7 @@ const ListTodos = () => {
 
   const updateData = async () => {
     try {
-      const response = await fetch("http://localhost:5000/1/objectives/check");
+      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`);
       const jsonData = await response.json();
       setObjectives(jsonData);
     } catch (error) {
@@ -49,7 +49,13 @@ const ListTodos = () => {
 
   return (
     <Fragment>
-      <table class="table mt-3">
+      {objectives.length < 1 ? 
+            (<>
+                <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+                <h6 className="ml-3">You have not added any objectives yet.</h6>
+                <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+            </>) :
+      <table className="table mt-3">
         <tbody>
           {objectives.map(objective => (
             <Fragment>
@@ -61,10 +67,10 @@ const ListTodos = () => {
               </td>
               <td>{objective.objective.objective_title}</td>
               <td className ="expand">
-                <EditObjective objective={objective} updateData = {updateData} ></EditObjective>
+                <EditObjective team_id={team_id} objective={objective} updateData = {updateData} ></EditObjective>
               </td>
               <td className ="expand">
-                <DeleteObjective objective={objective} updateData = {updateData} ></DeleteObjective>
+                <DeleteObjective team_id={team_id} objective={objective} updateData = {updateData} ></DeleteObjective>
               </td>
             </tr>
               {krShown.includes(objective.objective.objective_id) && (
@@ -74,7 +80,7 @@ const ListTodos = () => {
                     {objective.objective.description}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <h5 style={{color:"#8f0000", marginTop:"1.5rem"}}>Key Results</h5>
-                      <AddKR updateData={updateData} objective = {objective}></AddKR>
+                      <AddKR team_id={team_id} updateData={updateData} objective = {objective}></AddKR>
                     </div>
                     <table className="table mt-3">
                       <tbody>
@@ -85,10 +91,10 @@ const ListTodos = () => {
                                   <td className = "expand">{index+1}</td>
                                   <td style={{paddingLeft:"2rem"}}>{kr.key_result}</td>
                                   <td className = "expand">
-                                    <EditKR objective={objective} kr={kr} updateData={updateData}></EditKR>
+                                    <EditKR team_id={team_id} objective={objective} kr={kr} updateData={updateData}></EditKR>
                                   </td>
                                   <td className = "expand">
-                                    <DeleteKR objective={objective} kr={kr} updateData={updateData}></DeleteKR>
+                                    <DeleteKR team_id={team_id} objective={objective} kr={kr} updateData={updateData}></DeleteKR>
                                   </td>
                               </>):(
                                   <td colSpan="3">
@@ -104,7 +110,7 @@ const ListTodos = () => {
             </Fragment>
       ))}
         </tbody>
-      </table>
+      </table>}
     </Fragment>
   );
 };
