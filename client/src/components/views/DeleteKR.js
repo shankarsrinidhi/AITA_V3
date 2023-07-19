@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 
-const DeleteKR = ({ objective , updateData , kr }) => {
+const DeleteKR = ({ team_id, objective , updateData , kr }) => {
     const deleteKR = async e => {
         try {
             console.log("objective id is "+ objective.objective.objective_id);

@@ -5,12 +5,12 @@ import {AiFillCheckCircle} from "react-icons/ai";
 import '../css_components/DraggableCardList.css';
 import EditProgress from "./EditProgress";
 
-function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
+function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/completedplans`);
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/completedplans`);
       const jsonData = await response.json();
       setProgress(jsonData);
     } catch (err) {
@@ -28,7 +28,7 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
       const plan_title = plan.plan_title
       const body = { plan_title };
       const response = await fetch(
-        `http://localhost:5000/1/progress/markasincomplete/${plan.plan_id}`,
+        `http://localhost:5000/${team_id}/progress/markasincomplete/${plan.plan_id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -66,7 +66,7 @@ function CompletedPlannedTasks({refreshCompletedTasks, refreshUncompletedTasks, 
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditProgress plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
+                            <EditProgress team_id={team_id} plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
                             <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
                           </div>
                         </li>

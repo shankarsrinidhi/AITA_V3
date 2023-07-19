@@ -17,7 +17,6 @@ import pamplinlogo from '../logo-images/pamplin.png';
 export default function SignUp() {
   const firstNameRef = useRef()
   const lastNameRef = useRef()
-  const phoneRef = useRef()
   const emailRef = useRef()
   const passwordRef = useRef()
   const passwordConfirmRef = useRef()
@@ -38,8 +37,7 @@ export default function SignUp() {
       const email = emailRef.current.value;
       const firstName= firstNameRef.current.value;
       const lastName = lastNameRef.current.value;
-      const phone = phoneRef.current.value;
-      const body = { email, phone, firstName, lastName };
+      const body = { email, firstName, lastName };
       const response = await fetch(
         `http://localhost:5000/student/new`,
         {
@@ -80,17 +78,14 @@ export default function SignUp() {
                 {error && <Alert variant="danger">{error}</Alert>}
                 <Form onSubmit={handleSubmit}>
                 <Form.Group id="first_name">
-                    <Form.Label>Given Name</Form.Label>
+                    <Form.Label>First Name</Form.Label>
                     <Form.Control type="text" ref={firstNameRef} required />
                   </Form.Group>
                   <Form.Group id="last_name">
-                    <Form.Label>Surname</Form.Label>
+                    <Form.Label>Last Name</Form.Label>
                     <Form.Control type="text" ref={lastNameRef} required />
                   </Form.Group>
-                  <Form.Group id="phone">
-                    <Form.Label>Phone Number</Form.Label>
-                    <Form.Control type="text" ref={phoneRef} required />
-                  </Form.Group>
+            
                   <Form.Group id="email">
                     <Form.Label>Email</Form.Label>
                     <Form.Control type="email" ref={emailRef} required />

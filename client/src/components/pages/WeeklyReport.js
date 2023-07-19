@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 import { AiFillCaretRight } from "react-icons/ai";
 import { AiFillCaretLeft } from "react-icons/ai";
 import '../css_components/WeeklyReport.css'
@@ -16,9 +16,12 @@ import AddPlan from "../views/AddPlan";
 import ProblemsList from "../views/ProblemsList";
 import AddProblem from "../views/AddProblem";
 import { useParams } from 'react-router-dom';
+import { useAuth } from "../../contexts/AuthContext"
+import { TeamContext } from '../../contexts/TeamContext';
   
 function WeeklyReport() {
-    const { week_start } = useParams();
+    
+    const { week_start, team_id } = useParams();
     const [currentDate, setCurrentDate] = useState(new Date(week_start));
     const [started,setStarted] = useState(false);
     const [submitted,setSubmitted] = useState(false);
@@ -29,6 +32,57 @@ function WeeklyReport() {
     const [additionalTasksRefreshCount, setAdditionalTasksRefreshCount] = useState(0);
     const [plansRefreshCount,setPlansRefreshCount] = useState(0);
     const [problemsRefreshCount,setProblemsRefreshCount] = useState(0);
+    const { currentUser, logout } = useAuth()
+    const [welcome, setWelcome] = useState(true);
+    const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
+    const [shouldRender, setShouldRender] = useState(false);
+
+    setTimeout(() => {
+      setShouldRender(true);
+    }, 500);
+
+    const getTeams = async e => {
+      try {
+        if (team_id === "default"){
+          return;
+        }
+        const id =  currentUser.email;
+        const body = { id };
+        const response = await fetch(
+          `http://localhost:5000/teams`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          }
+        );
+        const jsonData = await response.json();
+        setTeams(jsonData);
+  
+      } catch (err) {
+        console.error(err.message);
+      }
+    };
+    
+    useEffect(() => {
+      getTeams();
+    },[]);
+
+
+    /*const getWelcome = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/userteam/${currentUser.email}`);
+        const jsonData = await response.json();
+        setWelcome(jsonData.result);
+      } catch (err) {
+        console.error(err.message);
+      }
+    };
+
+    useEffect(() => {
+      getWelcome();
+    }, []);*/
+    //console.log("teams in wr page"+teams);
 
     const handleCloseError = () => setShowError(false);
 
@@ -38,9 +92,12 @@ function WeeklyReport() {
 
     const handleShowSuccess = () => setShowSuccess(true);
 
-    const getSubmitted = async (project_id,week_start,week_end) => {
+    const getSubmitted = async (week_start,week_end) => {
       try {
-        const response = await fetch(`http://localhost:5000/1/reportsubmitted/${week_start}/${week_end}`);
+        if (team_id === "default"){
+          return;
+        }
+        const response = await fetch(`http://localhost:5000/${team_id}/reportsubmitted/${week_start}/${week_end}`);
         const jsonData = await response.json();
         setSubmitted(jsonData.result);
       } catch (err) {
@@ -49,12 +106,15 @@ function WeeklyReport() {
     };
 
     useEffect(() => {
-      getSubmitted(1,formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
+      getSubmitted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
     }, []);
     
-    const getStarted = async (project_id,week_start,week_end) => {
+    const getStarted = async (week_start,week_end) => {
       try {
-        const response = await fetch(`http://localhost:5000/1/reportstarted/${week_start}/${week_end}`);
+        if (team_id === "default"){
+          return;
+        }
+        const response = await fetch(`http://localhost:5000/${team_id}/reportstarted/${week_start}/${week_end}`);
         const jsonData = await response.json();
         setStarted(jsonData.result);
       } catch (err) {
@@ -63,12 +123,12 @@ function WeeklyReport() {
     };
   
     useEffect(() => {
-      getStarted(1,formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
+      getStarted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
     }, []);
     
-    const getPlans = async (project_id,week_start,week_end) => {
+    const getPlans = async (week_start,week_end) => {
       try {
-        const response = await fetch(`http://localhost:5000/${project_id}/report/${week_start}/${week_end}/plans`);
+        const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`);
         const jsonData = await response.json();
         return jsonData;
       } catch (err) {
@@ -113,8 +173,8 @@ function WeeklyReport() {
       setAdditionalTasksRefreshCount(additionalTasksRefreshCount+1);
       setPlansRefreshCount(plansRefreshCount+1);
       setProblemsRefreshCount(problemsRefreshCount + 1);
-      getStarted(1,formatDate(prevWeekStartDate()),formatDate(prevWeekEndDate()));
-      getSubmitted(1,formatDate(prevWeekStartDate()),formatDate(prevWeekEndDate()));
+      getStarted(formatDate(prevWeekStartDate()),formatDate(prevWeekEndDate()));
+      getSubmitted(formatDate(prevWeekStartDate()),formatDate(prevWeekEndDate()));
     };
   
     const handleNextWeek = () => {
@@ -126,8 +186,8 @@ function WeeklyReport() {
       setAdditionalTasksRefreshCount(additionalTasksRefreshCount+1);
       setPlansRefreshCount(plansRefreshCount+1);
       setProblemsRefreshCount(problemsRefreshCount + 1);
-      getStarted(1,formatDate(nextWeekStartDate()),formatDate(nextWeekEndDate()));
-      getSubmitted(1,formatDate(nextWeekStartDate()),formatDate(nextWeekEndDate()));
+      getStarted(formatDate(nextWeekStartDate()),formatDate(nextWeekEndDate()));
+      getSubmitted(formatDate(nextWeekStartDate()),formatDate(nextWeekEndDate()));
     };
     
     const getWeekStartDate = () => {
@@ -171,11 +231,10 @@ function WeeklyReport() {
 
     const startReport = async () => {
         try {
-           const project_id = 1;
            const week_start = formatDate(getWeekStartDate());
            const week_end = formatDate(getWeekEndDate());
            const response = await fetch(
-            `http://localhost:5000/${project_id}/startreport/${week_start}/${week_end}`,
+            `http://localhost:5000/${team_id}/startreport/${week_start}/${week_end}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -191,17 +250,16 @@ function WeeklyReport() {
     const submitReport = async (e) => {
       e.preventDefault();
       try {
-         const project_id = 1;
          const week_start = formatDate(getWeekStartDate());
          const week_end = formatDate(getWeekEndDate());
-         const plans = await getPlans(project_id,week_start,week_end);
+         const plans = await getPlans(week_start,week_end);
          if (plans.length < 1){
           handleShowError();
           return;
          }
          else{
           const response = await fetch(
-          `http://localhost:5000/${project_id}/submitreport/${week_start}/${week_end}`,
+          `http://localhost:5000/${team_id}/submitreport/${week_start}/${week_end}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -219,21 +277,20 @@ function WeeklyReport() {
     
     return (
       <Fragment>
-        <div className='container'>
-          <Header/>
-          <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Home</h4>
-          <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-        </div>
+        {shouldRender? <div className='container'>
+          <Header team_id={ team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
+          
+        </div>: null}
         <div className='container'>
           <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Submit Weekly Report</h4>
           <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-          <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {teams.length>0 ? (<> {shouldRender? <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button className = "btn1 float-left" onClick={handlePreviousWeek}><AiFillCaretLeft></AiFillCaretLeft>Prev</button>
             <h5 className="text-center mr-1 ml-1" style={{color:'#8F0000', fontFamily: 'Lato'}}>
               Week : {getWeekStartDate().toDateString()} - {getWeekEndDate().toDateString()}
             </h5>
             <button className = "btn1 float-right" onClick={handleNextWeek}>Next<AiFillCaretRight></AiFillCaretRight></button>
-          </div>
+          </div> : null}
           <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
           {started ? 
           (<div className='container'>
@@ -241,33 +298,33 @@ function WeeklyReport() {
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Completed Planned Tasks</h6>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <CompletedPlannedTasks key={`CP${completedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
+            {shouldRender? <div><CompletedPlannedTasks team_id={team_id} key={`CP${completedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Uncompleted Planned Tasks</h6>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <UncompletedPlannedTasks key={`UP${uncompletedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} refreshProblems = {refreshProblems} prevweek_start = {formatDate(prevWeekStartDate())} prevweek_end = {formatDate(prevWeekEndDate())} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></UncompletedPlannedTasks>
+            <UncompletedPlannedTasks team_id={team_id} key={`UP${uncompletedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} refreshProblems = {refreshProblems} prevweek_start = {formatDate(prevWeekStartDate())} prevweek_end = {formatDate(prevWeekEndDate())} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></UncompletedPlannedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Additional Tasks Completed</h6>
-            <AddProgressRow refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AddProgressRow>
+            <AddProgressRow team_id={team_id} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AddProgressRow>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <AdditionalCompletedTasks key={`AP${additionalTasksRefreshCount}`} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AdditionalCompletedTasks>
+            <AdditionalCompletedTasks team_id={team_id} key={`AP${additionalTasksRefreshCount}`} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AdditionalCompletedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plans</h4>
               <AddPlan refreshPlans={refreshPlans} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddPlan>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <PlansList key={`PL${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>
+            <PlansList team_id={team_id} key={`PL${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Problems</h4>
-              <AddProblem refreshProblems={refreshProblems} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddProblem>
+              <AddProblem team_id={team_id} refreshProblems={refreshProblems} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddProblem>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <ProblemsList key={`PR${problemsRefreshCount}`} refreshProblems={refreshProblems} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></ProblemsList>
-            <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+            <ProblemsList team_id={team_id} key={`PR${problemsRefreshCount}`} refreshProblems={refreshProblems} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></ProblemsList>
+            <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr></div>:null}
               {submitted  ? (<br></br>):(
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <button style={{ borderRadius: '50px', padding: '10px 20px' , margin:'1rem'}} onClick={submitReport}>Submit this week's report</button>
@@ -281,9 +338,10 @@ function WeeklyReport() {
               <button style={{ borderRadius: '50px', padding: '10px 20px' , margin:'3rem'}} onClick={startReport}>Start this week's report</button>
             </div>
             </>)}
+        </>) : (<h5 className="ml-3 text-center">Welcome! You are currently not added to any team. Please wait to be added or reach out to the admin</h5>)}
         </div>
         <div>
-          <Footer />
+          <Footer team_id={team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
         </div>
         <Modal
           show={showSuccess}
@@ -321,7 +379,7 @@ function WeeklyReport() {
             </Button>
           </Modal.Footer>
         </Modal>
-     </Fragment>
+     </Fragment> 
     );
   }
   

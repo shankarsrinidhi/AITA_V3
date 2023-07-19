@@ -5,13 +5,13 @@ import { GrClose } from "react-icons/gr";
 import axios from "axios"
 import React, { Fragment, useState, useEffect } from "react";
 
-const Mission = () =>{
+const Mission = ({team_id}) =>{
     const [mission, setMission] = useState("");
     const [initialMissionValue, setInitialMissionValue] = useState("");
     const [missionEditButtonVisible, setMissionEditButtonVisible] = useState(false);
 
     useEffect(() => {
-      axios.get("http://localhost:5000/1/mission").then((response) => {
+      axios.get(`http://localhost:5000/${team_id}/mission`).then((response) => {
         setMission(response.data.mission);
         setInitialMissionValue(response.data.mission);
       });
@@ -31,7 +31,7 @@ const Mission = () =>{
       try {
         setInitialMissionValue(mission);
         const body = { mission };
-        const response = await fetch("http://localhost:5000/1/mission", {
+        const response = await fetch(`http://localhost:5000/${team_id}/mission`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body)
@@ -75,21 +75,21 @@ return(
         </div>
         </div>
         </div>
-        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Change Mission</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div className="modal fade" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="exampleModalLongTitle">Change Mission</h5>
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
-              <div class="modal-body">
+              <div className="modal-body">
                 Are you sure you want to save changes to the mission of your project?
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onClick={onSaveMission} data-dismiss="modal">Save changes</button>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" className="btn btn-primary" onClick={onSaveMission} data-dismiss="modal">Save changes</button>
               </div>
             </div>
           </div>

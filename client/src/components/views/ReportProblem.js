@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {FaExclamation} from "react-icons/fa";
 
-const ReportProblem = ({ refreshProblems, week_start, week_end, plan_id }) => {
+const ReportProblem = ({ refreshProblems, week_start, week_end, plan_id, team_id }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [mitigation, setMitigation] = useState("");
@@ -23,14 +23,13 @@ const ReportProblem = ({ refreshProblems, week_start, week_end, plan_id }) => {
     try {
       const body = { title, description, mitigation, plan_id};
       const response = await fetch(
-        `http://localhost:5000/1/report/${week_start}/${week_end}/problem`,
+        `http://localhost:5000/${team_id}/report/${week_start}/${week_end}/problem`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      console.log("problems refressh valuye "+refreshProblems);
       if (refreshProblems) refreshProblems();
       handleClose();
       

@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { MdOutlineModeEditOutline } from "react-icons/md";
 
-const EditObjective = ({ objective , updateData }) => {
+const EditObjective = ({ team_id, objective , updateData }) => {
   const [description, setDescription] = useState(objective.objective.description);
   const [title, setTitle] = useState(objective.objective.objective_title);
   const [show, setShow] = useState(false);
@@ -17,7 +17,7 @@ const EditObjective = ({ objective , updateData }) => {
     try {
       const body = { title, description };
       const response = await fetch(
-        `http://localhost:5000/1/objectives/${objective.objective.objective_id}`,
+        `http://localhost:5000/${team_id}/objectives/${objective.objective.objective_id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

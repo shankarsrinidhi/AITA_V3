@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditUncompletedPlan = ({ plan_id, plan_title, plan_description, student, related_objectives, marked_complete, refreshUncompletedTasks, refreshHomeTasks }) => {
+const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, student, related_objectives, marked_complete, refreshUncompletedTasks, refreshHomeTasks }) => {
   const [title, setTitle] = useState(plan_title);
   const [description, setDescription] = useState(plan_description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -31,7 +31,7 @@ const EditUncompletedPlan = ({ plan_id, plan_title, plan_description, student, r
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -46,7 +46,7 @@ const EditUncompletedPlan = ({ plan_id, plan_title, plan_description, student, r
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch("http://localhost:5000/1/objectives");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -90,7 +90,7 @@ const EditUncompletedPlan = ({ plan_id, plan_title, plan_description, student, r
     try {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
-          `http://localhost:5000/1/plans/editplan/${plan_id}`,
+          `http://localhost:5000/${team_id}/plans/editplan/${plan_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { MdOutlineModeEditOutline } from "react-icons/md"; 
 
-const EditKR = ({ updateData , objective, kr }) => {
+const EditKR = ({ team_id, updateData , objective, kr }) => {
   const [description, setDescription] = useState(kr.key_result);
   const [show, setShow] = useState(false);
 

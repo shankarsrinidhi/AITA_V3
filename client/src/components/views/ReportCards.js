@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from 'react-router-dom'
 import "../css_components/ReportCards.css";
 
-function ReportCards() {
+function ReportCards({team_id}) {
   const [cards, setCards] = useState([]);
+  const navigate = useNavigate();
+
   const getCards = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/pastweeklyreports/check`);
+      const response = await fetch(`http://localhost:5000/${team_id}/pastweeklyreports/check`);
       const jsonData = await response.json();
       setCards(jsonData);
     } catch (err) {
@@ -25,17 +28,18 @@ function ReportCards() {
 
   return (
     <div>
+      {cards.length < 1 ? 
+            (<>
+                
+                <h6 className="ml-3">You have not submitted any reports in the past.</h6>
+                
+            </>) :
       <section>
         <div className="container">
           <div className="cards">
-            {cards.length < 1 ? 
-            (<>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <h5 className="center mt-3">You have not submitted any reports in the past.</h5>
-                </div>
-            </>) : <>
+             <>
             {cards.map((card, i) => (
-              <div key={i} className="speccard" onClick={() => window.location = `/weeklyReport/${card.report.week_end_date}`}>
+              <div key={i} className="speccard" onClick={() => navigate( `/weeklyReport/${card.report.week_end_date}/team/${team_id}`)}>
                 <div><h3 className="text-center">Week Ending {formatDate(card.report.week_end_date)}</h3></div>
                 <hr style={{color: '#8f0000', width: '100%', margin:'2px'}}></hr>
                 <h6 className="text-center" style={{color:'#8f0000'}}>Progress reported for the week</h6>
@@ -47,10 +51,10 @@ function ReportCards() {
                 </>)}
                 </ul>
               </div>
-            ))}</> }
+            ))}</> 
           </div>
         </div>
-      </section>
+      </section>}
     </div>
   );
 }

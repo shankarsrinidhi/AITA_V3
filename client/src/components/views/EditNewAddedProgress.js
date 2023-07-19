@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => {
+const EditNewAddedProgress = ({ team_id, progress, refreshAdditionalCompletedTasks }) => {
   const [title, setTitle] = useState(progress.progress_title);
   const [description, setDescription] = useState(progress.description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -47,7 +47,7 @@ const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => 
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -62,7 +62,7 @@ const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => 
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch("http://localhost:5000/1/objectives");
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`);
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
     {
@@ -91,7 +91,7 @@ const EditNewAddedProgress = ({ progress, refreshAdditionalCompletedTasks }) => 
     try {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
         const response = await fetch(
-          `http://localhost:5000/1/progress/editadditionalprogress/${progress.progress_id}`,
+          `http://localhost:5000/${team_id}/progress/editadditionalprogress/${progress.progress_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },

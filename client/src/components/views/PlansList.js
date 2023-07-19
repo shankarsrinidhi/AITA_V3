@@ -5,11 +5,11 @@ import {AiOutlineDelete} from "react-icons/ai";
 import '../css_components/DraggableCardList.css';
 import EditPlans from "./EditPlans";
 
-function PlansList({refreshPlans, week_start, week_end}) {
+function PlansList({team_id, refreshPlans, week_start, week_end}) {
   const [plans, setPlans] = useState([]);
   const getPlans = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/1/report/${week_start}/${week_end}/plans`);
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`);
       const jsonData = await response.json();
       setPlans(jsonData);
     } catch (err) {
@@ -26,7 +26,7 @@ function PlansList({refreshPlans, week_start, week_end}) {
     try {
       const plan_id= plan.plan_id;
       const response = await fetch(
-        `http://localhost:5000/1/report/plan/${plan_id}`,
+        `http://localhost:5000/${team_id}/report/plan/${plan_id}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -64,27 +64,27 @@ function PlansList({refreshPlans, week_start, week_end}) {
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditPlans refreshPlans={refreshPlans} plan={plan}></EditPlans>
+                            <EditPlans team_id = {team_id} refreshPlans={refreshPlans} plan={plan}></EditPlans>
                           <button className = "btn3 float-right" data-toggle="modal" data-target={`#PLDelid${plan.plan_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
                           </div>
                         </li>
                       )}
                     </Draggable>
-                      <div class="modal fade" id={`PLDelid${plan.plan_id}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered" role="document">
-                      <div class="modal-content">
-                          <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <div className="modal fade" id={`PLDelid${plan.plan_id}`} tabIndex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                      <div className="modal-dialog modal-dialog-centered" role="document">
+                      <div className="modal-content">
+                          <div className="modal-header">
+                          <h5 className="modal-title" id="exampleModalLongTitle">Delete Task?</h5>
+                          <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                               <span aria-hidden="true">&times;</span>
                           </button>
                           </div>
-                          <div class="modal-body">
+                          <div className="modal-body">
                           Are you sure you want to delete this task?
                           </div>
-                          <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                          <button type="button" class="btn btn-primary" onClick={() => deletePlan({plan})} data-dismiss="modal">Yes</button>
+                          <div className="modal-footer">
+                          <button type="button" className="btn btn-secondary" data-dismiss="modal">No</button>
+                          <button type="button" className="btn btn-primary" onClick={() => deletePlan({plan})} data-dismiss="modal">Yes</button>
                           </div>
                       </div>
                       </div>
