@@ -6,6 +6,7 @@ const pool = require("./db");
 //middleware
 app.use(cors());
 app.use(express.json());
+const authenticateFirebaseToken = require('./middleware/firebase');
 
 var session = require('express-session');
 var CASAuthentication = require('cas-authentication');
@@ -23,7 +24,11 @@ var cas = new CASAuthentication({
 });
 
 
-
+app.get('/protected-route', authenticateFirebaseToken, (req, res) => {
+    // This route is protected and can only be accessed with a valid Firebase token
+    // You can access the authenticated user's information using `req.user`
+    res.json({ message: 'Access granted! You are authorized to access this route.' });
+  });
 
 
 // Unauthenticated clients will be redirected to the CAS login and then back to
@@ -183,7 +188,7 @@ app.post("/student/new", async(req,res)=>{
 //Get routes 
 
 //Get team ids for a given user
-app.post("/teams", async(req,res)=>{
+app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
     try {
        // console.log(req.body);
         const { id } = req.body;

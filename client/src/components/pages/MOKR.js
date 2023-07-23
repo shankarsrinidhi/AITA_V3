@@ -20,37 +20,33 @@ const MOKR = () => {
     setShouldRender(true);
   }, 500);
 
-  /*const getWelcome = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/userteam/${currentUser.email}`);
-      const jsonData = await response.json();
-      setWelcome(jsonData.result);
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
-
-  useEffect(() => {
-    getWelcome();
-  }, []);*/
+ 
 
   const getTeams = async e => {
     try {
       if (team_id === "default"){
         return;
       }
+      const idToken = localStorage.getItem('firebaseIdToken');
       const id =  currentUser.email;
       const body = { id };
       const response = await fetch(
         `http://localhost:5000/teams`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      const jsonData = await response.json();
+      if (response.ok) {
+        const jsonData = await response.json();
       setTeams(jsonData);
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
 
     } catch (err) {
       console.error(err.message);

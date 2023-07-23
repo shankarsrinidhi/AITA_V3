@@ -42,7 +42,14 @@ export default function LogIn() {
     try {
       setError("")
       setLoading(true)
-      await login(emailRef.current.value, passwordRef.current.value);
+      const userCredential = await login(emailRef.current.value, passwordRef.current.value); 
+        // User login successful
+        const user = userCredential.user;
+        // Access the ID token
+         const idToken = user && await user.getIdToken();
+        //console.log(idToken);
+        // Store the ID token in local storage or state
+        localStorage.setItem('firebaseIdToken', idToken);
       navigate("/home/default");
     } catch {
       setError("Failed to log in")
