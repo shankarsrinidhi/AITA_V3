@@ -12,9 +12,21 @@ function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompl
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/report/${prevweek_start}/${prevweek_end}/uncompletedplans`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${prevweek_start}/${prevweek_end}/uncompletedplans`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setProgress(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -41,16 +53,24 @@ function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompl
   const markAsComplete = async ({plan_id, plan_title, description, student, related_objectives}) =>{
      try {
        const body = { plan_title, description, student, related_objectives};
+       const idToken = localStorage.getItem('firebaseIdToken');
        const response = await fetch(
          `http://localhost:5000/${team_id}/progress/${plan_id}/markascomplete/${week_start}/${week_end}`,
          {
            method: "PUT",
-           headers: { "Content-Type": "application/json" },
+           headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
            body: JSON.stringify(body)
          }
        );
-       refreshCompletedTasks();
-       refreshUncompletedTasks();
+       if (response.ok) {
+        refreshCompletedTasks();
+        refreshUncompletedTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+       
      } catch (error) {
        console.error('Error fetching updated data:', error);
      }
@@ -58,15 +78,23 @@ function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompl
 
    const removePlan = async ({plan_id}) =>{
      try {
+      const idToken = localStorage.getItem('firebaseIdToken');
        const response = await fetch(
          `http://localhost:5000/${team_id}/progress/remove/${plan_id}`,
          {
            method: "PUT",
-           headers: { "Content-Type": "application/json" },
+           headers: { 'Authorization': `Bearer ${idToken}`,"Content-Type": "application/json" },
            
          }
        );
-       refreshUncompletedTasks();
+       if (response.ok) {
+        refreshUncompletedTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
      } catch (error) {
        console.error('Error fetching updated data:', error);
      }

@@ -17,16 +17,24 @@ const EditProblem = ({ team_id, problem, refreshProblems }) => {
     
     try {
         const body = { title, description, mitigation };
+        const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(
           `http://localhost:5000/${team_id}/problems/editproblem/${problem.problem_id}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             body: JSON.stringify(body)
           }
         );
-      refreshProblems();
-      handleClose();
+        if (response.ok) {
+          refreshProblems();
+          handleClose();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+      
     } catch (err) {
       console.error(err.message);
     }

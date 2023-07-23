@@ -10,9 +10,21 @@ function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncomplet
 
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/completedplans`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/completedplans`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setProgress(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -27,16 +39,24 @@ function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncomplet
     try {
       const plan_title = plan.plan_title
       const body = { plan_title };
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/progress/markasincomplete/${plan.plan_id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      refreshCompletedTasks();
+      if (response.ok) {
+        refreshCompletedTasks();
       refreshUncompletedTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }

@@ -11,7 +11,12 @@ const Mission = ({team_id}) =>{
     const [missionEditButtonVisible, setMissionEditButtonVisible] = useState(false);
 
     useEffect(() => {
-      axios.get(`http://localhost:5000/${team_id}/mission`).then((response) => {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      axios.get(`http://localhost:5000/${team_id}/mission`, {
+        headers:{
+          'Authorization': `Bearer ${idToken}`
+        }
+      }).then((response) => {
         setMission(response.data.mission);
         setInitialMissionValue(response.data.mission);
       });
@@ -31,12 +36,20 @@ const Mission = ({team_id}) =>{
       try {
         setInitialMissionValue(mission);
         const body = { mission };
+        const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(`http://localhost:5000/${team_id}/mission`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         });
-      setMissionEditButtonVisible(false);
+        if (response.ok) {
+          setMissionEditButtonVisible(false);
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+      
       } catch (err) {
         console.error(err.message);
       }

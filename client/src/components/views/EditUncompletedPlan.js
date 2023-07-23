@@ -31,13 +31,23 @@ const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, s
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (reqData.ok) {
       const resData= await reqData.json();
-      for(let i=0; i<resData.length; i++)
-    {
-      getstudentname.push(resData[i].full_name);
+      for(let i=0; i<resData.length; i++){
+        getstudentname.push(resData[i].full_name);
+      }
+      setStudentOptions(getstudentname);
+    } else {
+      if(reqData.status === 403){
+        window.location = '/login';
+      }
     }
-    setStudentOptions(getstudentname);
     } catch (error) {
       console.error("Error fetching options:", error);
     }
@@ -46,13 +56,24 @@ const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, s
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (reqData.ok) {
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
-    {
-        getobjectivetitle.push(resData[i].objective_title);
-    }
+      {
+          getobjectivetitle.push(resData[i].objective_title);
+      }
     setObjectives(getobjectivetitle);
+    } else {
+      if(reqData.status === 403){
+        window.location = '/login';
+      }
+    }
     } catch (error) {
       console.error("Error fetching options:", error);
     }
@@ -89,17 +110,26 @@ const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, s
       }
     try {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
+        const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(
           `http://localhost:5000/${team_id}/plans/editplan/${plan_id}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             body: JSON.stringify(body)
           }
         );
-        if (refreshUncompletedTasks) refreshUncompletedTasks();
-        if (refreshHomeTasks) refreshHomeTasks();
-      handleClose();
+        if (response.ok) {
+          if (refreshUncompletedTasks) refreshUncompletedTasks();
+          if (refreshHomeTasks) refreshHomeTasks();
+          handleClose();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+        
+      
       
     } catch (err) {
       console.error(err.message);

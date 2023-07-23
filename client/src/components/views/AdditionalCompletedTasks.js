@@ -9,9 +9,21 @@ function AdditionalCompletedTasks({ team_id, refreshAdditionalCompletedTasks, we
   const [progress, setProgress] = useState([]);
   const getProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/additionalprogress`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/additionalprogress`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setProgress(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -24,14 +36,22 @@ function AdditionalCompletedTasks({ team_id, refreshAdditionalCompletedTasks, we
   const deleteProgress = async ({progress}) =>{
     try {
       const progress_id= progress.progress_id;
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/report/progress/${progress_id}`,
         {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
         }
       );
-      refreshAdditionalCompletedTasks();
+      if (response.ok) {
+        refreshAdditionalCompletedTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }

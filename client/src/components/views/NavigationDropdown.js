@@ -24,6 +24,7 @@ const NavigationDropdown = () => {
 
     try {
       await logout();
+      localStorage.removeItem('firebaseIdToken');
       navigate("/login");
     } catch {
       setError("Failed to log out");

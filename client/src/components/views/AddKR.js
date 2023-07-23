@@ -18,18 +18,26 @@ const AddKR = ({ team_id, updateData , objective }) => {
   const addKR = async e => {
     e.preventDefault();
     try {
-        console.log("objective_id "+objective.objective.objective_id);
+        //console.log("objective_id "+objective.objective.objective_id);
       const body = { description };
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/objectives/${objective.objective.objective_id}/kr`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      updateData();
-      handleClose();
+      if (response.ok) {
+        updateData();
+       handleClose();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (err) {
       console.error(err.message);
     }

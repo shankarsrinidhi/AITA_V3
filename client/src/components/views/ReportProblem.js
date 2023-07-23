@@ -22,16 +22,24 @@ const ReportProblem = ({ refreshProblems, week_start, week_end, plan_id, team_id
     e.preventDefault();
     try {
       const body = { title, description, mitigation, plan_id};
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/report/${week_start}/${week_end}/problem`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      if (refreshProblems) refreshProblems();
+      if (response.ok) {
+        if (refreshProblems) refreshProblems();
       handleClose();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
       
     } catch (err) {
       console.error(err.message);

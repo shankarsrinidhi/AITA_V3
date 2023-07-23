@@ -48,17 +48,23 @@ function WeeklyReport() {
         }
         const id =  currentUser.email;
         const body = { id };
+        const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(
           `http://localhost:5000/teams`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             body: JSON.stringify(body)
           }
         );
-        const jsonData = await response.json();
-        setTeams(jsonData);
-  
+        if (response.ok) {
+          const jsonData = await response.json();
+          setTeams(jsonData);
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
       } catch (err) {
         console.error(err.message);
       }
@@ -97,9 +103,21 @@ function WeeklyReport() {
         if (team_id === "default"){
           return;
         }
-        const response = await fetch(`http://localhost:5000/${team_id}/reportsubmitted/${week_start}/${week_end}`);
-        const jsonData = await response.json();
+        const idToken = localStorage.getItem('firebaseIdToken');
+        const response = await fetch(`http://localhost:5000/${team_id}/reportsubmitted/${week_start}/${week_end}`,
+        {
+            method: "GET",
+            headers: { 'Authorization': `Bearer ${idToken}` },
+        });
+        if (response.ok) {
+          const jsonData = await response.json();
         setSubmitted(jsonData.result);
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+        
       } catch (err) {
         console.error(err.message);
       }
@@ -114,9 +132,21 @@ function WeeklyReport() {
         if (team_id === "default"){
           return;
         }
-        const response = await fetch(`http://localhost:5000/${team_id}/reportstarted/${week_start}/${week_end}`);
+        const idToken = localStorage.getItem('firebaseIdToken');
+        const response = await fetch(`http://localhost:5000/${team_id}/reportstarted/${week_start}/${week_end}`,
+        {
+          method: "GET",
+          headers: { 'Authorization': `Bearer ${idToken}` },
+       });
+       if (response.ok) {
         const jsonData = await response.json();
         setStarted(jsonData.result);
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+        
       } catch (err) {
         console.error(err.message);
       }
@@ -128,9 +158,21 @@ function WeeklyReport() {
     
     const getPlans = async (week_start,week_end) => {
       try {
-        const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`);
+        const idToken = localStorage.getItem('firebaseIdToken');
+        const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`,
+        {
+          method: "GET",
+          headers: { 'Authorization': `Bearer ${idToken}` },
+      });
+      if (response.ok) {
         const jsonData = await response.json();
         return jsonData;
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+        
       } catch (err) {
         console.error(err.message);
       }
@@ -233,15 +275,22 @@ function WeeklyReport() {
         try {
            const week_start = formatDate(getWeekStartDate());
            const week_end = formatDate(getWeekEndDate());
+           const idToken = localStorage.getItem('firebaseIdToken');
            const response = await fetch(
             `http://localhost:5000/${team_id}/startreport/${week_start}/${week_end}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              //body: JSON.stringify(body)
+              headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             }
           );
-          setStarted(true);
+          if (response.ok) {
+            setStarted(true);
+          } else {
+            if(response.status === 403){
+              window.location = '/login';
+            }
+          }
+          
         } catch (err) {
           console.error(err.message);
         }
@@ -258,16 +307,24 @@ function WeeklyReport() {
           return;
          }
          else{
+          const idToken = localStorage.getItem('firebaseIdToken');
           const response = await fetch(
           `http://localhost:5000/${team_id}/submitreport/${week_start}/${week_end}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             //body: JSON.stringify(body)
           }
         );
-        setSubmitted(true);
-        handleShowSuccess();
+        if (response.ok) {
+          setSubmitted(true);
+          handleShowSuccess();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+        
       }    
     } catch (err) {
         console.error(err.message);
@@ -313,7 +370,7 @@ function WeeklyReport() {
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plans</h4>
-              <AddPlan refreshPlans={refreshPlans} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddPlan>
+              <AddPlan team_id={team_id} refreshPlans={refreshPlans} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddPlan>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <PlansList team_id={team_id} key={`PL${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>

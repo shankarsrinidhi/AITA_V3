@@ -31,9 +31,21 @@ function Header({team_id}) {
           }
           
             //console.log("In else branch");
-          const response = await fetch(`http://localhost:5000/${team_id}/teamName`);
+            const idToken = localStorage.getItem('firebaseIdToken');
+          const response = await fetch(`http://localhost:5000/${team_id}/teamName`,
+          {
+            method: "GET",
+            headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        if (response.ok) {
           const jsonData = await response.json();
           setTeamName(jsonData);
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+          
         
         } catch (err) {
           console.error(err.message);

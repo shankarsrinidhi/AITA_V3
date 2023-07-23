@@ -8,9 +8,21 @@ function ReportCards({team_id}) {
 
   const getCards = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/pastweeklyreports/check`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/pastweeklyreports/check`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setCards(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
