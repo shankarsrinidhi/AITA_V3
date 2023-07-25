@@ -9,9 +9,21 @@ function PlansList({team_id, refreshPlans, week_start, week_end}) {
   const [plans, setPlans] = useState([]);
   const getPlans = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setPlans(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -25,15 +37,23 @@ function PlansList({team_id, refreshPlans, week_start, week_end}) {
   const deletePlan = async ({plan}) =>{
     try {
       const plan_id= plan.plan_id;
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/report/plan/${plan_id}`,
         {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           
         }
       );
-      refreshPlans();
+      if (response.ok) {
+        refreshPlans();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }

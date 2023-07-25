@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const AddPlan = ({ refreshPlans, week_start, week_end }) => {
+const AddPlan = ({ team_id, refreshPlans, week_start, week_end }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [studentOptions, setStudentOptions] = useState([]);
@@ -38,12 +38,24 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
   const fetchStudentOptions = async () => {
     try {
       const getstudentname=[];
-      const reqData= await fetch("http://localhost:5000/1/studentsdropdown");
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const reqData= await fetch(`http://localhost:5000/${team_id}/studentsdropdown`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` },
+    });
+    if (reqData.ok) {
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++){
         getstudentname.push(resData[i].full_name);
       }
       setStudentOptions(getstudentname);
+    } else {
+      if(reqData.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (error) {
       console.error("Error fetching options:", error);
     }
@@ -52,13 +64,25 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
   const fetchObjectiveOptions = async () => {
     try {
       const getobjectivetitle=[];
-      const reqData= await fetch("http://localhost:5000/1/objectives");
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const reqData= await fetch(`http://localhost:5000/${team_id}/objectives`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (reqData.ok) {
       const resData= await reqData.json();
       for(let i=0; i<resData.length; i++)
       {
           getobjectivetitle.push(resData[i].objective_title);
       }
     setObjectives(getobjectivetitle);
+    } else {
+      if(reqData.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (error) {
       console.error("Error fetching options:", error);
     }
@@ -82,16 +106,24 @@ const AddPlan = ({ refreshPlans, week_start, week_end }) => {
       }
     try {
       const body = { title, description, selectedStudentOptions, selectedObjectives };
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
-        `http://localhost:5000/1/report/${week_start}/${week_end}/plan`,
+        `http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plan`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      refreshPlans();
+      if (response.ok) {
+        refreshPlans();
       handleClose();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (err) {
       console.error(err.message);
     }

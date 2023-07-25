@@ -10,15 +10,23 @@ const AddObjective = ({team_id}) => {
     e.preventDefault();
     try {
       const body = { title, description };
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/objectives`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      window.location = `/MOKR/${team_id}`;
+      if (response.ok) {
+        window.location = `/MOKR/${team_id}`;
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (err) {
       console.error(err.message);
     }

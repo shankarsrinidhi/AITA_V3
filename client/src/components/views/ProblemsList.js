@@ -10,9 +10,21 @@ function ProblemsList({team_id, refreshProblems, week_start, week_end}) {
 
   const getProblems = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/problems`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/problems`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setProblems(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -25,14 +37,22 @@ function ProblemsList({team_id, refreshProblems, week_start, week_end}) {
   const deleteProblem = async ({problem}) =>{
     try {
       const problem_id= problem.problem_id;
+      const idToken = localStorage.getItem('firebaseIdToken');
       const response = await fetch(
         `http://localhost:5000/${team_id}/report/problem/${problem_id}`,
         {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
         }
       );
-      refreshProblems();
+      if (response.ok) {
+        refreshProblems();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }

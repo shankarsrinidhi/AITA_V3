@@ -4,10 +4,19 @@ import { AiOutlineDelete } from "react-icons/ai";
 const DeleteObjective = ({ team_id, objective , updateData }) => {
     const deleteObjective = async e => {
         try {
+          const idToken = localStorage.getItem('firebaseIdToken');
           const deleteObjective = await fetch(`http://localhost:5000/${team_id}/objectives/${objective.objective.objective_id}`, {
-            method: "DELETE"
+          headers:{'Authorization': `Bearer ${idToken}`},  
+          method: "DELETE"
           });
-          updateData();
+          if (deleteObjective.ok) {
+            updateData();
+          } else {
+            if(deleteObjective.status === 403){
+              window.location = '/login';
+            }
+          }
+          
         } catch (err) {
           console.error(err.message);
         }

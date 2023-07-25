@@ -18,9 +18,21 @@ function HomePlannedTasks({ refreshHomeTasks, week_start, week_end, prevweek_sta
       if (team_id === "default"){
         return;
       }
-      const response = await fetch(`http://localhost:5000/${team_id}/home/${prevweek_start}/${prevweek_end}/plannedtasks`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/home/${prevweek_start}/${prevweek_end}/plannedtasks`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setProgress(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -74,15 +86,23 @@ function HomePlannedTasks({ refreshHomeTasks, week_start, week_end, prevweek_sta
         return;
       }
        const body = { plan_title, description, student, related_objectives};
+       const idToken = localStorage.getItem('firebaseIdToken');
        const response = await fetch(
          `http://localhost:5000/${team_id}/progress/${plan_id}/markascomplete/${week_start}/${week_end}`,
          {
            method: "PUT",
-           headers: { "Content-Type": "application/json" },
+           headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
            body: JSON.stringify(body)
          }
        );
-       refreshHomeTasks();
+       if (response.ok) {
+        refreshHomeTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+       
      } catch (error) {
        console.error('Error fetching updated data:', error);
      }
@@ -93,15 +113,23 @@ function HomePlannedTasks({ refreshHomeTasks, week_start, week_end, prevweek_sta
       if (team_id === "default"){
         return;
       }
+      const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(
             `http://localhost:5000/{team_id}/report/plan/${plan_id}`,
             {
               method: "DELETE",
-              headers: { "Content-Type": "application/json" },
+              headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
               
             }
           );
-       refreshHomeTasks();
+          if (response.ok) {
+            refreshHomeTasks();
+          } else {
+            if(response.status === 403){
+              window.location = '/login';
+            }
+          }
+       
      } catch (error) {
        console.error('Error fetching updated data:', error);
      }
@@ -114,15 +142,23 @@ function HomePlannedTasks({ refreshHomeTasks, week_start, week_end, prevweek_sta
         return;
       }
        const body = { plan_title };
+       const idToken = localStorage.getItem('firebaseIdToken');
        const response = await fetch(
          `http://localhost:5000/${team_id}/progress/markasincomplete/${plan_id}`,
          {
            method: "PUT",
-           headers: { "Content-Type": "application/json" },
+           headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
            body: JSON.stringify(body)
          }
        );
-       refreshHomeTasks();
+       if (response.ok) {
+        refreshHomeTasks();
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+       
      } catch (error) {
        console.error('Error fetching updated data:', error);
      }

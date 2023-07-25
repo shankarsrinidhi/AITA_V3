@@ -17,18 +17,25 @@ export default function Home() {
   const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
   const getTeams = async e => {
     try {
+      const idToken = localStorage.getItem('firebaseIdToken');
       const id =  currentUser.email;
       const body = { id };
       const response = await fetch(
         `http://localhost:5000/teams`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );
-      const jsonData = await response.json();
-      setTeams(jsonData);
+      if (response.ok) {
+        const jsonData = await response.json();
+        setTeams(jsonData);
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
 
     } catch (err) {
       console.error(err.message);
@@ -46,14 +53,14 @@ setTimeout(() => {
 }, 500);
 
   const { team_id } = useParams();
-  const [currentDate, setCurrentDate] = useState(new Date("Mon Feb 08 2022 05:30:00 GMT+0530 (India Standard Time)"));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [homeTasksRefreshCount, setHomeTasksRefreshCount] = useState(0);
   
   const [welcome, setWelcome] = useState(true);
  
   //const [teams, setTeams] = useState([]);
 
-  const getWelcome = async () => {
+  /*const getWelcome = async () => {
     try {
       const response = await fetch(`http://localhost:5000/userteam/${currentUser.email}`);
       const jsonData = await response.json();
@@ -65,7 +72,36 @@ setTimeout(() => {
 
   useEffect(() => {
     getWelcome();
-  }, []);
+  }, []);*/
+
+  /*const fetchDataWithToken = async () => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      //console.log(idToken);
+      const response = await fetch('http://localhost:5000/protected-route', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json', // Adjust the content type as needed
+        },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        //console.log(data);
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchDataWithToken();
+  }, []);*/
 
   //add Problem function
   

@@ -12,9 +12,21 @@ const ListTodos = ({team_id}) => {
 
   const getObjectives = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setObjectives(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (err) {
       console.error(err.message);
     }
@@ -26,9 +38,21 @@ const ListTodos = ({team_id}) => {
 
   const updateData = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`);
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const response = await fetch(`http://localhost:5000/${team_id}/objectives/check`,
+      {
+        method: "GET",
+        headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    if (response.ok) {
       const jsonData = await response.json();
       setObjectives(jsonData);
+    } else {
+      if(response.status === 403){
+        window.location = '/login';
+      }
+    }
+      
     } catch (error) {
       console.error('Error fetching updated data:', error);
     }

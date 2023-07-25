@@ -6,6 +6,7 @@ const pool = require("./db");
 //middleware
 app.use(cors());
 app.use(express.json());
+const authenticateFirebaseToken = require('./middleware/firebase');
 
 var session = require('express-session');
 var CASAuthentication = require('cas-authentication');
@@ -23,7 +24,11 @@ var cas = new CASAuthentication({
 });
 
 
-
+app.get('/protected-route', authenticateFirebaseToken, (req, res) => {
+    // This route is protected and can only be accessed with a valid Firebase token
+    // You can access the authenticated user's information using `req.user`
+    res.json({ message: 'Access granted! You are authorized to access this route.' });
+  });
 
 
 // Unauthenticated clients will be redirected to the CAS login and then back to
@@ -90,7 +95,7 @@ const isAuthenticated = (req, res, next) => {
 //post routes
 
 //post new objective
-app.post("/:team_id/objectives",  async(req,res)=>{
+app.post("/:team_id/objectives", authenticateFirebaseToken,  async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { title, description } = req.body;
@@ -102,7 +107,7 @@ app.post("/:team_id/objectives",  async(req,res)=>{
 });
 
 //post new Key result
-app.post("/objectives/:objective_id/kr",  async(req,res)=>{
+app.post("/objectives/:objective_id/kr", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { objective_id } = req.params;
         const { description } = req.body;
@@ -115,7 +120,7 @@ app.post("/objectives/:objective_id/kr",  async(req,res)=>{
 
 
 //Post new progress row
-app.post("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/progress", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -129,7 +134,7 @@ app.post("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
 });
 
 //Post new plan
-app.post("/:team_id/report/:start_date/:end_date/plan", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/plan", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -143,7 +148,7 @@ app.post("/:team_id/report/:start_date/:end_date/plan", async(req,res)=>{
 });
 
 //post new problem
-app.post("/:team_id/report/:start_date/:end_date/problem", async(req,res)=>{
+app.post("/:team_id/report/:start_date/:end_date/problem", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -157,7 +162,7 @@ app.post("/:team_id/report/:start_date/:end_date/problem", async(req,res)=>{
 
 
 //post start weekly report
-app.post("/:team_id/startreport/:start_date/:end_date", async(req,res)=>{
+app.post("/:team_id/startreport/:start_date/:end_date", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -169,10 +174,10 @@ app.post("/:team_id/startreport/:start_date/:end_date", async(req,res)=>{
 });
 
 //post new student on signup
-app.post("/student/new", async(req,res)=>{
+app.post("/student/new", authenticateFirebaseToken, async(req,res)=>{
     try {
-        const { firstName , lastName, phone, email } = req.body;
-        const newStudent = await pool.query("INSERT INTO student(email, phone_number, first_name, last_name) VALUES($1,$2,$3,$4) RETURNING *",[email , phone, firstName, lastName]);
+        const { firstName , lastName, email } = req.body;
+        const newStudent = await pool.query("INSERT INTO student(email, first_name, last_name) VALUES($1,$2,$3) RETURNING *",[email , firstName, lastName]);
         res.json(newStudent.rows[0]);
     } catch (err) {
         console.error(err.message);
@@ -183,7 +188,7 @@ app.post("/student/new", async(req,res)=>{
 //Get routes 
 
 //Get team ids for a given user
-app.post("/teams", async(req,res)=>{
+app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
     try {
        // console.log(req.body);
         const { id } = req.body;
@@ -196,7 +201,7 @@ app.post("/teams", async(req,res)=>{
 
 
 //Get team name details to display on the header
-app.get("/:id/teamName",  async(req,res)=>{
+app.get("/:id/teamName",  authenticateFirebaseToken, async(req,res)=>{
     try {
         const { id } = req.params;
         const teamName =  await pool.query("SELECT team_name FROM team WHERE team_id = $1",[id]);
@@ -207,7 +212,7 @@ app.get("/:id/teamName",  async(req,res)=>{
 });
 
 //Get all objectives for a project
-app.get("/:team_id/objectives", async(req,res)=>{
+app.get("/:team_id/objectives", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const todo =  await pool.query("SELECT * FROM objective WHERE team_id = $1",[team_id]);
@@ -218,7 +223,7 @@ app.get("/:team_id/objectives", async(req,res)=>{
 });
 
 //Get all the objectives with their corresponding key results
-app.get("/:team_id/objectives/check", async(req,res)=>{
+app.get("/:team_id/objectives/check", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const todo =  await pool.query("SELECT jsonb_build_object( 'objective_id', o.objective_id, 'objective_title', o.objective_title, 'description', o.description, 'keyresults', jsonb_agg(jsonb_build_object('kr_id', k.kr_id,'key_result', k.key_result))) AS objective FROM objective o LEFT JOIN keyresult k ON o.objective_id = k.objective_id WHERE o.team_id = $1 GROUP BY o.objective_id ORDER BY o.objective_id",[team_id]);
@@ -230,7 +235,7 @@ app.get("/:team_id/objectives/check", async(req,res)=>{
 
 
 //get details for home page display past weekly reports cards
-app.get("/:team_id/pastweeklyreports/check", async(req,res)=>{
+app.get("/:team_id/pastweeklyreports/check", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const todo =  await pool.query("SELECT jsonb_build_object( 'report_id', r.report_id, 'week_start_date', r.week_start_date, 'week_end_date', r.week_end_date, 'submitted_on', r.submitted_on, 'team_id', r.team_id, 'started', r.started, 'progress', jsonb_agg(jsonb_build_object('progress_id', p.progress_id, 'progress_title', p.progress_title))) AS report FROM weeklyreport r LEFT JOIN progress p ON r.report_id = p.report_id WHERE r.team_id = $1 AND r.submitted_on IS NOT NULL GROUP BY r.report_id ORDER BY r.week_start_date DESC",[team_id]);
@@ -241,7 +246,7 @@ app.get("/:team_id/pastweeklyreports/check", async(req,res)=>{
 });
 
 // check for MOKR submission
-app.get("/:team_id/isMOKRSubmitted", async(req,res)=>{
+app.get("/:team_id/isMOKRSubmitted", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { id } = req.params;
         const mokrSubmitted =  await pool.query("SELECT mokrsubmitted FROM project WHERE team_id = $1",[id]);
@@ -253,7 +258,7 @@ app.get("/:team_id/isMOKRSubmitted", async(req,res)=>{
 
 
 //mission of the project
-app.get("/:team_id/mission", async(req,res)=>{
+app.get("/:team_id/mission", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const mission =  await pool.query("SELECT mission FROM team WHERE team_id = $1",[team_id]);
@@ -264,7 +269,7 @@ app.get("/:team_id/mission", async(req,res)=>{
 });
 
 //get details of the progress 
-app.get("/:team_id/report/:report_id/progress", async(req,res)=>{
+app.get("/:team_id/report/:report_id/progress", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { report_id } = req.params;
@@ -276,7 +281,7 @@ app.get("/:team_id/report/:report_id/progress", async(req,res)=>{
 });
 
 
-app.get("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/progress", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -289,7 +294,7 @@ app.get("/:team_id/report/:start_date/:end_date/progress", async(req,res)=>{
 });
 
 //get progress details of plans from past week that is completed (to display in completed plans section)
-app.get("/:team_id/report/:start_date/:end_date/completedplans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/completedplans", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -302,7 +307,7 @@ app.get("/:team_id/report/:start_date/:end_date/completedplans", async(req,res)=
 });
 
 //get plans details from past week that have not been marked complete (to display in uncompleted plans section)
-app.get("/:team_id/report/:start_date/:end_date/uncompletedplans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/uncompletedplans", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -315,7 +320,7 @@ app.get("/:team_id/report/:start_date/:end_date/uncompletedplans", async(req,res
 });
 
 //to get list of all planned tasks to be displayed on the home screen
-app.get("/:team_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>{
+app.get("/:team_id/home/:start_date/:end_date/plannedtasks", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -329,7 +334,7 @@ app.get("/:team_id/home/:start_date/:end_date/plannedtasks", async(req,res)=>{
 
 
 //To display additional completed tasks in weekly report page
-app.get("/:team_id/report/:start_date/:end_date/additionalprogress", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/additionalprogress", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -343,7 +348,7 @@ app.get("/:team_id/report/:start_date/:end_date/additionalprogress", async(req,r
 
 
 //to display current week plans in plans section
-app.get("/:team_id/report/:start_date/:end_date/plans", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/plans", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -356,7 +361,7 @@ app.get("/:team_id/report/:start_date/:end_date/plans", async(req,res)=>{
 });
 
 //to display problems in problems section of weekly report page
-app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
+app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date } = req.params;
@@ -369,7 +374,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
 });
 
 //for select dropdown population
-    app.get("/:team_id/studentsdropdown", async(req,res)=>{
+    app.get("/:team_id/studentsdropdown", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { team_id } = req.params;
             const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM student s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1",[team_id]);
@@ -379,7 +384,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
         }
     });
 
-    app.get("/:plan_id/progress", async(req,res)=>{
+    app.get("/:plan_id/progress", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { plan_id } = req.params;
             const progress =  await pool.query("SELECT * FROM progress WHERE plan_id = $1 ",[plan_id]);
@@ -391,7 +396,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
 
 
     // to check if weekly report is started
-        app.get("/:team_id/reportstarted/:start_date/:end_date", async(req,res)=>{
+        app.get("/:team_id/reportstarted/:start_date/:end_date", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { team_id } = req.params;
             const { start_date } = req.params;
@@ -404,7 +409,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
     });
 
     // to check if weekly report is submitted
-    app.get("/:team_id/reportsubmitted/:start_date/:end_date", async(req,res)=>{
+    app.get("/:team_id/reportsubmitted/:start_date/:end_date", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { team_id } = req.params;
             const { start_date } = req.params;
@@ -417,7 +422,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
     });
 
     // to check if user is part of any team
-    app.get("/userteam/:email", async(req,res)=>{
+    app.get("/userteam/:email", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { email } = req.params;
             const userTeam =  await pool.query("SELECT EXISTS (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) AS result",[email]);
@@ -431,7 +436,7 @@ app.get("/:team_id/report/:start_date/:end_date/problems", async(req,res)=>{
 //put routes
 
 //add mission details
-app.put("/:team_id/mission", async(req,res)=>{
+app.put("/:team_id/mission", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { mission } = req.body;
@@ -444,7 +449,7 @@ app.put("/:team_id/mission", async(req,res)=>{
 
 
 //update objective row on click of the edit pencil icon
-app.put("/:team_id/objectives/:objective_id", async(req,res)=>{
+app.put("/:team_id/objectives/:objective_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { objective_id } = req.params;
@@ -458,7 +463,7 @@ app.put("/:team_id/objectives/:objective_id", async(req,res)=>{
 
 
 //update key result row on click of the edit pencil icon
-app.put("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
+app.put("/objectives/:objective_id/kr/:kr_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { kr_id } = req.params;
         const { objective_id } = req.params;
@@ -471,7 +476,7 @@ app.put("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
 });
 
 //to mark as incomplete from progress section
-app.put("/:team_id/progress/markasincomplete/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/markasincomplete/:plan_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { plan_id } = req.params;
@@ -485,7 +490,7 @@ app.put("/:team_id/progress/markasincomplete/:plan_id", async(req,res)=>{
 });
 
 //to mark previous week's plan as complete from progress section
-app.put("/:team_id/progress/:plan_id/markascomplete/:start_date/:end_date", async(req,res)=>{
+app.put("/:team_id/progress/:plan_id/markascomplete/:start_date/:end_date", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -501,7 +506,7 @@ app.put("/:team_id/progress/:plan_id/markascomplete/:start_date/:end_date", asyn
 });
 
 //to edit the progress from completed plans section
-app.put("/:team_id/progress/editcompletedplan/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/editcompletedplan/:plan_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { plan_id } = req.params;
@@ -516,7 +521,7 @@ app.put("/:team_id/progress/editcompletedplan/:plan_id", async(req,res)=>{
 });
 
 // to edit additional progress
-app.put("/:team_id/progress/editadditionalprogress/:progress_id", async(req,res)=>{
+app.put("/:team_id/progress/editadditionalprogress/:progress_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { progress_id } = req.params;
@@ -530,7 +535,7 @@ app.put("/:team_id/progress/editadditionalprogress/:progress_id", async(req,res)
 });
 
 //edit plans
-app.put("/:team_id/plans/editplan/:plan_id", async(req,res)=>{
+app.put("/:team_id/plans/editplan/:plan_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { plan_id } = req.params;
@@ -545,7 +550,7 @@ app.put("/:team_id/plans/editplan/:plan_id", async(req,res)=>{
 
 
 //edit problems
-app.put("/:team_id/problems/editproblem/:problem_id", async(req,res)=>{
+app.put("/:team_id/problems/editproblem/:problem_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { problem_id } = req.params;
@@ -560,7 +565,7 @@ app.put("/:team_id/problems/editproblem/:problem_id", async(req,res)=>{
 
 
 //mark weekly report as submitted
-app.put("/:team_id/submitreport/:start_date/:end_date", async(req,res)=>{
+app.put("/:team_id/submitreport/:start_date/:end_date", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { start_date , end_date } = req.params;
@@ -574,7 +579,7 @@ app.put("/:team_id/submitreport/:start_date/:end_date", async(req,res)=>{
 
 
 //delete/remove from the screen the plan of a previous week from progress section
-app.put("/:team_id/progress/remove/:plan_id", async(req,res)=>{
+app.put("/:team_id/progress/remove/:plan_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { plan_id } = req.params;
@@ -588,7 +593,7 @@ app.put("/:team_id/progress/remove/:plan_id", async(req,res)=>{
 //delete routes
 
 //delete objectives and KRs (check cascading)
-app.delete("/:team_id/objectives/:objective_id", async(req,res)=>{
+app.delete("/:team_id/objectives/:objective_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { team_id } = req.params;
         const { objective_id } = req.params;
@@ -601,7 +606,7 @@ app.delete("/:team_id/objectives/:objective_id", async(req,res)=>{
 });
 
 //delete KR
-app.delete("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
+app.delete("/objectives/:objective_id/kr/:kr_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { kr_id } = req.params;
         const { objective_id } = req.params;
@@ -613,7 +618,7 @@ app.delete("/objectives/:objective_id/kr/:kr_id", async(req,res)=>{
 });
 
 //Delete Progress on click of dumpster icon in Additional Completed Tasks Section
-app.delete("/:team_id/report/progress/:progress_id", async(req,res)=>{
+app.delete("/:team_id/report/progress/:progress_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { progress_id } = req.params;
         const deleteProg = await pool.query("DELETE from progress WHERE progress_id = $1",[progress_id]);
@@ -624,7 +629,7 @@ app.delete("/:team_id/report/progress/:progress_id", async(req,res)=>{
 });
 
 //delete plans
-app.delete("/:team_id/report/plan/:plan_id", async(req,res)=>{
+app.delete("/:team_id/report/plan/:plan_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { plan_id } = req.params;
         const deletePlan = await pool.query("DELETE from plan WHERE plan_id = $1",[plan_id]);
@@ -635,7 +640,7 @@ app.delete("/:team_id/report/plan/:plan_id", async(req,res)=>{
 });
 
 //delete problem
-app.delete("/:team_id/report/problem/:problem_id", async(req,res)=>{
+app.delete("/:team_id/report/problem/:problem_id", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { problem_id } = req.params;
         const deleteProblem = await pool.query("DELETE from problem WHERE problem_id = $1",[problem_id]);
