@@ -111,16 +111,24 @@ const EditNewAddedProgress = ({ team_id, progress, refreshAdditionalCompletedTas
       }
     try {
         const body = { title, description, selectedStudentOptions, selectedObjectives };
+        const idToken = localStorage.getItem('firebaseIdToken');
         const response = await fetch(
           `http://localhost:5000/${team_id}/progress/editadditionalprogress/${progress.progress_id}`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
             body: JSON.stringify(body)
           }
         );
-      refreshAdditionalCompletedTasks();
-      handleClose();
+        if (response.ok) {
+          refreshAdditionalCompletedTasks();
+          handleClose();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+      
     } catch (err) {
       console.error(err.message);
     }

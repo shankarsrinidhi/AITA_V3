@@ -21,7 +21,7 @@ const Footer = ({team_id}) => {
                 <i className="material-icons nav__icon">home</i>
                 <span className="nav__text">Dashboard</span>
             </CustomLink>
-            <CustomLink to={`/weeklyReport/${new Date("Mon Jan 31 2022 05:30:00 GMT-0500 (Eastern Standard Time)")}/team/${team_id}`}>
+            <CustomLink to={`/weeklyReport/${new Date()}/team/${team_id}`}>
                 <i className="material-icons nav__icon">add_circle</i>
                 <span className="nav__text">Weekly Report</span>
             </CustomLink>

@@ -53,7 +53,7 @@ setTimeout(() => {
 }, 500);
 
   const { team_id } = useParams();
-  const [currentDate, setCurrentDate] = useState(new Date("Mon Feb 08 2022 05:30:00 GMT+0530 (India Standard Time)"));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [homeTasksRefreshCount, setHomeTasksRefreshCount] = useState(0);
   
   const [welcome, setWelcome] = useState(true);
