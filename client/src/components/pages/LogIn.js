@@ -1,12 +1,12 @@
 
 import React, { useRef, useState, useEffect, useContext } from "react"
-import { Form, Button, Card, Alert } from "react-bootstrap"
 import { useAuth } from "../../contexts/AuthContext"
+import { TeamContext } from '../../contexts/TeamContext';
+import { Form, Button, Card, Alert } from "react-bootstrap"
 import { Link, useNavigate } from 'react-router-dom'
 import { Container } from "react-bootstrap"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import pamplinlogo from '../logo-images/pamplin.png';
-import { TeamContext } from '../../contexts/TeamContext';
 
 //Styling for the page
 const containerStyle = {

@@ -1,0 +1,101 @@
+services:
+
+  traefik:
+    image: "traefik:v2.8"
+    container_name: "endeavors-traefik"
+    command:
+      - "--log.level=ERROR"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:9000"
+    ports:
+      - "9000:9000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  server:
+    image: node:18
+    container_name: "endeavors-server"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/server
+    env_file:
+      - .env
+    working_dir: /server
+    command: ["sh", "./docker-entrypoint.sh"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.endeavserver-stripprefix.stripPrefix.prefixes=/admin"
+      - "traefik.http.middlewares.endeavserver-stripprefix.stripPrefix.prefixes=/api"
+      - "traefik.http.middlewares.endeavserver-stripprefix.stripPrefix.prefixes=/strapi"
+      - "traefik.http.routers.endeavserver.rule=Host(`$SERVER_HOSTNAME`) && (PathPrefix(`/admin`) || PathPrefix(`/api`) || PathPrefix(`/strapi`))"
+      - "traefik.http.routers.endeavserver.entrypoints=web"
+      - "traefik.http.routers.endeavserver.middlewares=endeavserver-stripprefix"
+
+  client:
+    image: node:18
+    container_name: "endeavors-client"
+    volumes:
+      - ./client:/client
+    env_file:
+      - .env
+    ports:
+      - 3000:3000 # server port
+    # entrypoint: ["tail", "-f", "/dev/null"] # for startup troubleshooting
+    working_dir: /client
+    command: ["sh", "./docker-entrypoint.sh"]
+    # command: bash -c "chown -R node.node /client && ./docker-entrypoint.sh"
+    # command: >
+    #   bash npm install
+    #   bash chown -R node.node /node_modules
+    #   bash npm start
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.endeavclient-stripprefix.stripPrefix.prefixes=/"
+      - "traefik.http.routers.endeavclient.rule=Host(`$SERVER_HOSTNAME`) && !PathPrefix(`/admin`) && !PathPrefix(`/api`) && !PathPrefix(`/strapi`) && !PathPrefix(`/auth`)"
+      - "traefik.http.routers.endeavclient.entrypoints=web"
+      - "traefik.http.routers.endeavclient.middlewares=endeavclient-stripprefix"
+
+  db:
+    image: postgres
+    container_name: "endeavors-postgres"
+    volumes:
+      - ./db/postgres-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    restart: always
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    ports:
+      - 5432:5432
+        
+  # keycloak:
+  #   image: quay.io/keycloak/keycloak:legacy
+  #   container_name: "endeavors-keycloak"
+  #   environment:
+  #     DB_VENDOR: POSTGRES
+  #     DB_ADDR: db
+  #     DB_DATABASE: keycloak
+  #     DB_USER: keycloakadmin
+  #     DB_SCHEMA: public
+  #     DB_PASSWORD: keycloakpass
+  #     KEYCLOAK_USER: admin
+  #     KEYCLOAK_PASSWORD: Pa55w0rd
+  #     KC_HOSTNAME_PATH: /auth
+  #     ROOT_LOGLEVEL: FATAL
+  #     # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+  #     #JDBC_PARAMS: "ssl=true"
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - db
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.middlewares.endeavkeycloak-stripprefix.stripPrefix.prefixes=/auth"
+  #     - "traefik.http.routers.endeavkeycloak.rule=Host(`$SERVER_HOSTNAME`) && (PathPrefix(`/auth`))"
+  #     - "traefik.http.routers.endeavkeycloak.entrypoints=web"
+  #     - "traefik.http.routers.endeavkeycloak.middlewares=endeavkeycloak-stripprefix"

@@ -15,6 +15,9 @@ import pamplinlogo from '../logo-images/pamplin.png';
   };
   
 export default function SignUp() {
+  // env vars starting with REACT_APP_ are injected into the build process
+  const API_URL = process.env.REACT_APP_API_URL
+
   const firstNameRef = useRef()
   const lastNameRef = useRef()
   const emailRef = useRef()
@@ -33,16 +36,17 @@ export default function SignUp() {
     try {
       setError("")
       setLoading(true)
-      await signup(emailRef.current.value, passwordRef.current.value)
+      const signupResponse = await signup(emailRef.current.value, passwordRef.current.value)
+      const idToken = await signupResponse.user.getIdToken(); // getIdToken is a method of user
       const email = emailRef.current.value;
       const firstName= firstNameRef.current.value;
       const lastName = lastNameRef.current.value;
       const body = { email, firstName, lastName };
       const response = await fetch(
-        `http://localhost:5000/student/new`,
+        API_URL + `/student/new`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
           body: JSON.stringify(body)
         }
       );

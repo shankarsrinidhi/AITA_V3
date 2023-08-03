@@ -7,9 +7,10 @@ import PrivateRoutes from "./routes/PrivateRoutes";
 import { Route, Routes } from "react-router-dom";
 import MOKR from "./components/pages/MOKR";
 import WeeklyReport from "./components/pages/WeeklyReport";
-import  Home  from "./components/pages/Home";
+import Home from "./components/pages/Home";
 import SignUp from "./components/pages/SignUp";
 import LogIn from "./components/pages/LogIn";
+import Admin from "./components/pages/Admin";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import ForgotPassword from "./components/pages/ForgotPassword";
@@ -21,39 +22,24 @@ import { TeamContext } from './contexts/TeamContext';
 
 function App() {
 
- 
-
-  
-
-
   return (
     <AuthProvider>
       <TeamProvider>
-    <Fragment>
-      
-          
+        <Fragment>
 
-        
-      
-      
-      <Routes>
-         <Route path="/login" element={<LogIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          
-          <Route path="/home/:team_id" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
-          <Route path="/weeklyReport/:week_start/team/:team_id" element={<PrivateRoutes> <WeeklyReport /> </PrivateRoutes>} />
-          <Route path="/MOKR/:team_id" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
-         
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-        </Routes>
-        
-        
-        
-      
-     
-      
-    </Fragment>
-    </TeamProvider>
+          <Routes>
+            <Route path="/" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/signup" element={<SignUp />} /> 
+            <Route path="/home/:team_id" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
+            <Route path="/weeklyReport/:week_start/team/:team_id" element={<PrivateRoutes> <WeeklyReport /> </PrivateRoutes>} />
+            <Route path="/MOKR/:team_id" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/appadmin" element={<PrivateRoutes> <Admin /> </PrivateRoutes>} />
+          </Routes>
+
+        </Fragment>
+      </TeamProvider>
     </AuthProvider>
   );
 }

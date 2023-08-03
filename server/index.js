@@ -2,10 +2,13 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
+const router = express.Router()
 
 //middleware
 app.use(cors());
 app.use(express.json());
+app.use('/api', router);
+
 const authenticateFirebaseToken = require('./middleware/firebase');
 
 var session = require('express-session');
@@ -23,6 +26,10 @@ var cas = new CASAuthentication({
     service_url : 'https://4405-2607-b400-2-ef40-00-1040.ngrok-free.app'
 });
 
+
+router.get('/test', (req, res) => {
+    res.json({ message: 'Access granted! You are authorized to access this route.' });
+});
 
 app.get('/protected-route', authenticateFirebaseToken, (req, res) => {
     // This route is protected and can only be accessed with a valid Firebase token
@@ -174,7 +181,7 @@ app.post("/:team_id/startreport/:start_date/:end_date", authenticateFirebaseToke
 });
 
 //post new student on signup
-app.post("/student/new", authenticateFirebaseToken, async(req,res)=>{
+router.post("/student/new", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { firstName , lastName, email } = req.body;
         const newStudent = await pool.query("INSERT INTO student(email, first_name, last_name) VALUES($1,$2,$3) RETURNING *",[email , firstName, lastName]);
@@ -199,6 +206,15 @@ app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
     }
 });
 
+// get instructors
+router.get("/instructors",  authenticateFirebaseToken, async(req,res)=>{
+    try {
+        const instructors =  await pool.query("SELECT instructor_id, email, first_name, last_name, is_admin FROM instructor");
+        res.json(instructors);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
 
 //Get team name details to display on the header
 app.get("/:id/teamName",  authenticateFirebaseToken, async(req,res)=>{
