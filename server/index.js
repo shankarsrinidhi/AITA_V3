@@ -184,6 +184,20 @@ app.post("/student/new", authenticateFirebaseToken, async(req,res)=>{
     }
 });
 
+// post new team on sql
+app.post("/newTeam", authenticateFirebaseToken, async(req,res)=>{
+    try {
+        const { name, industry, selectedStudentOptions, selectedInstructorOptions } = req.body;
+        const newTeam = await pool.query("INSERT INTO team (team_name, industry) VALUES($1,$2) RETURNING team_id",[name, industry]);
+        const check = newTeam.rows[0].team_id;
+        const addStudents = await pool.query(" SELECT insert_students_to_teams($1, $2)",[selectedStudentOptions,check]);
+        const addInstructors = await pool.query(" SELECT insert_students_to_teams($1, $2)",[selectedInstructorOptions,check]);
+        res.json(newTeam.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
 
 //Get routes 
 
@@ -192,7 +206,21 @@ app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
     try {
        // console.log(req.body);
         const { id } = req.body;
-        const teams =  await pool.query("SELECT team_name, team_id FROM team WHERE team_id IN (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) ORDER BY team_id",[id]);
+        const teams =  await pool.query("SELECT team_name, team_id FROM team WHERE team_id IN (SELECT team_id FROM users s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) ORDER BY team_id",[id]);
+       // console.log(teams.rows);
+        res.json(teams.rows);
+    } catch (err) {
+        console.error("in this "+err.message);
+    }
+});
+
+//Get current team details
+//SELECT  t.team_id, t.team_name, t.industry, jsonb_agg(jsonb_build_object('email', st.email,'full_name', concat(s.first_name,' ', s.last_name))) AS students FROM team t JOIN student_teams st ON t.team_id = st.team_id JOIN student s ON st.email = s.email WHERE t.team_id = 1 GROUP BY t.team_id;
+app.get("/teamdetails/:id",  async(req,res)=>{
+    try {
+        //console.log(req.params);
+        const { id } = req.params;
+        const teams =  await pool.query("SELECT  t.team_id, t.team_name, t.industry, jsonb_agg(jsonb_build_object('email', st.email, 'isInstructor', s.isInstructor, 'full_name', concat(s.first_name,' ', s.last_name))) AS students FROM team t JOIN student_teams st ON t.team_id = st.team_id JOIN student s ON st.email = s.email WHERE t.team_id = $1 GROUP BY t.team_id",[id]);
         res.json(teams.rows);
     } catch (err) {
         console.error(err.message);
@@ -377,7 +405,53 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
     app.get("/:team_id/studentsdropdown", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { team_id } = req.params;
-            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM student s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1",[team_id]);
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM users s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1",[team_id]);
+            res.json(students.rows);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // for dropdown of all students of the app to add to the new team
+    app.post("/fullstudentsdropdown", authenticateFirebaseToken, async(req,res)=>{
+        try {
+           const {id} = req.body;
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, email FROM users s WHERE s.email != $1 AND s.isInstructor IS NOT true",[id]);
+            res.json(students.rows);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // for dropdown of all instructors of the app to add to the new team
+    app.post("/fullinstructorsdropdown", authenticateFirebaseToken, async(req,res)=>{
+        try {
+           const {id} = req.body;
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, email FROM users s WHERE s.isInstructor IS true");
+            res.json(students.rows);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // for dropdown of all students not part of the team for edit team page
+    app.post("/teamstudentsdropdown/:team_id", authenticateFirebaseToken, async(req,res)=>{
+        try {
+            const {team_id} = req.params;
+           const {id} = req.body;
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, s.email FROM users s WHERE s.email NOT IN (SELECT s.email FROM users s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1) AND s.isInstructor IS false",[team_id]);
+            res.json(students.rows);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // for dropdown of all students not part of the team for edit team page
+    app.post("/teaminstructorsdropdown/:team_id", authenticateFirebaseToken, async(req,res)=>{
+        try {
+            const {team_id} = req.params;
+           const {id} = req.body;
+            const students =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, s.email FROM users s WHERE s.email NOT IN (SELECT s.email FROM users s JOIN student_teams st ON s.email = st.email WHERE st.team_id =$1) AND s.isInstructor IS true",[team_id]);
             res.json(students.rows);
         } catch (err) {
             console.error(err.message);
@@ -425,8 +499,33 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
     app.get("/userteam/:email", authenticateFirebaseToken, async(req,res)=>{
         try {
             const { email } = req.params;
-            const userTeam =  await pool.query("SELECT EXISTS (SELECT team_id FROM student s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) AS result",[email]);
+            const userTeam =  await pool.query("SELECT EXISTS (SELECT team_id FROM users s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) AS result",[email]);
             res.json(userTeam.rows[0]);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    // to get dropdown list of courses
+    app.get("/courses", authenticateFirebaseToken, async(req,res)=>{
+        try {
+            
+            const courses =  await pool.query("SELECT * FROM course ORDER BY course_code ASC");
+           // console.log(courses.rows[0]);
+            res.json(courses.rows);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+
+    // to get dropdown list of teams part of that course
+    app.post("/course/allTeams", authenticateFirebaseToken, async(req,res)=>{
+        try {
+            const { email } = req.body;
+            const courseTeams =  await pool.query("SELECT * FROM team WHERE crn IN (SELECT course FROM users WHERE email = $1)",[email]);
+           console.log(courseTeams.rows);
+            res.json(courseTeams.rows);
         } catch (err) {
             console.error(err.message);
         }
@@ -590,6 +689,34 @@ app.put("/:team_id/progress/remove/:plan_id", authenticateFirebaseToken, async(r
     }
 });
 
+
+//edit team functionality in edit team page
+app.put("/editTeam/:team_id", authenticateFirebaseToken, async(req,res)=>{
+    try {
+        const {team_id} = req.params;
+        const { name, industry, selectedStudentOptions } = req.body;
+        const newTeam = await pool.query("UPDATE team SET team_name = $1, industry = $2 WHERE team_id=$3",[name, industry,team_id]);
+      // console.log(selectedStudentOptions);
+        const addStudents = await pool.query(" SELECT insert_students_to_teams($1, $2)",[selectedStudentOptions,team_id]);
+        res.json("updated");
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+//edit new user info
+app.put("/newuser", authenticateFirebaseToken, async(req,res)=>{
+    try {
+        const { email, selectedOption, selectedOptionCourse } = req.body;
+        const newUser = await pool.query("UPDATE users SET new = false, type = $1, course = $2 WHERE email =$3",[selectedOption, selectedOptionCourse, email]);
+       
+        res.json("updated");
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+
 //delete routes
 
 //delete objectives and KRs (check cascading)
@@ -644,6 +771,18 @@ app.delete("/:team_id/report/problem/:problem_id", authenticateFirebaseToken, as
     try {
         const { problem_id } = req.params;
         const deleteProblem = await pool.query("DELETE from problem WHERE problem_id = $1",[problem_id]);
+        res.json("Deleted");
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+//delete student from team
+app.delete("/:team_id/removestudent", authenticateFirebaseToken, async(req,res)=>{
+    try {
+        const { team_id } = req.params;
+        const {email} = req.body;
+        const deleteStudent = await pool.query("DELETE from student_teams WHERE email = $1 AND team_id =$2",[email,team_id]);
         res.json("Deleted");
     } catch (err) {
         console.error(err.message);

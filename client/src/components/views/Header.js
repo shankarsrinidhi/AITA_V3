@@ -14,7 +14,7 @@ import { TeamContext } from '../../contexts/TeamContext';
   align : 'center'
   }; 
 
-function Header({team_id}) {
+function Header({team_id, noTitle}) {
 //console.log(" in header team_id "+team_id);
     const [teamName, setTeamName] = useState("");
     const { currentUser, logout } = useAuth()
@@ -26,9 +26,10 @@ function Header({team_id}) {
     const getTeamName = async () => {
         try {
         
-          if (team_id === "default" && teams?.length === 0){
+          if ((team_id === "default" && teams?.length === 0) || team_id === undefined){
             return;
           }
+
           
             //console.log("In else branch");
             const idToken = localStorage.getItem('firebaseIdToken');
@@ -62,11 +63,12 @@ function Header({team_id}) {
     <header>
         <div  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <img className= "mt-2" src={pamplinlogo} style={pamplin} /> 
-        <NavigationDropdown></NavigationDropdown>
+        <NavigationDropdown team_id={team_id}></NavigationDropdown>
         </div>
-        <div>
-      <h4 className="centered">{teamName.team_name}</h4>
-      </div>
+       {noTitle ? null : 
+      (<div>
+        <h4 className="centered">{teamName.team_name}</h4>
+      </div>)} 
     </header>
   );
 }

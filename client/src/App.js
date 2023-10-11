@@ -17,6 +17,11 @@ import { useAuth } from "./contexts/AuthContext";
 import { TeamProvider } from "./contexts/TeamContext";
 import  { useContext, useEffect } from 'react';
 import { TeamContext } from './contexts/TeamContext';
+import NewTeam from "./components/pages/NewTeam";
+import EditTeam from "./components/pages/EditTeam";
+import TeamManagement from "./components/pages/TeamManagement";
+import NewUser from "./components/pages/NewUser";
+import NewCourse from "./components/pages/NewCourse";
 
 
 function App() {
@@ -39,10 +44,14 @@ function App() {
       <Routes>
          <Route path="/login" element={<LogIn />} />
           <Route path="/signup" element={<SignUp />} />
-          
+          <Route path="/newuser" element={<PrivateRoutes><NewUser /></PrivateRoutes>} />
+          <Route path="/teammanagement/:userType" element={<PrivateRoutes><TeamManagement /></PrivateRoutes>  } />
           <Route path="/home/:team_id" element={<PrivateRoutes> <Home /> </PrivateRoutes>} />
           <Route path="/weeklyReport/:week_start/team/:team_id" element={<PrivateRoutes> <WeeklyReport /> </PrivateRoutes>} />
           <Route path="/MOKR/:team_id" element={<PrivateRoutes><MOKR /></PrivateRoutes> } />
+          <Route path="/editTeam/:team_id" element={<PrivateRoutes> <EditTeam /> </PrivateRoutes>} />
+          <Route path="/newTeam/:team_id" element={<PrivateRoutes> <NewTeam /> </PrivateRoutes>} />
+          <Route path="/newCourse/:team_id" element={<PrivateRoutes> <NewCourse /> </PrivateRoutes>} />
          
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>

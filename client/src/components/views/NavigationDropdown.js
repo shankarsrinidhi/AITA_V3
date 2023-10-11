@@ -8,12 +8,17 @@ import { TeamContext } from '../../contexts/TeamContext';
 
 
 
-const NavigationDropdown = () => {
+const NavigationDropdown = ({team_id}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const { currentUser, logout } = useAuth();
   const {teams, setTeams, setSelectedTeam, selectedTeam, setCount, count} = useContext(TeamContext);
+
+  setTimeout(() => {
+    setShouldRender(true);
+  }, 500);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -38,25 +43,32 @@ const NavigationDropdown = () => {
 
   }
 
+  async function editTeam() {}
+  async function newTeam() {}
+
 
   return (
     <div className="float-right">
       <div onClick={toggleDropdown} className={`hamburger-icon ${isOpen ? 'active' : ''}`}>
       <FaBars style={{color: '#8f0000', fontSize: '50px', padding: '7.5px', marginTop:'05px'}}/>
       </div>
-      {isOpen && (
+      {isOpen && shouldRender && (
         <div className="dropdown">
+        <ul>
+        { teams?.length > 0 ?
+        <> <li>Switch to a different Team :</li>
           <ul>
-            <li>Switch to a different Team :</li>
-            <ul>
-                {teams?.map((team, index) =>(
-                    <li key= {index} className='li2' onClick={() => selectTeam(team)}>{team.team_name}</li>
+              {teams?.map((team, index) =>(
+                  <li key= {index} className='li2' onClick={() => selectTeam(team)}>{team.team_name}</li>
 
-                ))}
-            </ul>
-            <li onClick={handleLogout}>Logout</li>
+              ))}
           </ul>
-        </div>
+          <li onClick={() => {navigate(`/editTeam/${team_id}`)}}>Edit Team</li></> : <></>}
+          {team_id === undefined ? <></>:<> <li onClick={() => {navigate(`/newTeam/${team_id}`)}}>Create New Team</li></>}
+          <li onClick={handleLogout}>Logout</li>
+        </ul>
+      </div>
+        
       )}
     </div>
   );
