@@ -5,7 +5,7 @@ import {AiOutlineDelete} from "react-icons/ai";
 import '../css_components/DraggableCardList.css';
 import EditProblem from "./EditProblem";
 
-function ProblemsList({team_id, refreshProblems, week_start, week_end}) {
+function ProblemsList({nonEditable, team_id, refreshProblems, week_start, week_end}) {
   const [problems, setProblems] = useState([]);
 
   const getProblems = async () => {
@@ -81,8 +81,8 @@ function ProblemsList({team_id, refreshProblems, week_start, week_end}) {
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditProblem team_id={team_id} refreshProblems={refreshProblems} problem={problem}></EditProblem>
-                            <button className = "btn3 float-right" data-toggle="modal" data-target={`#ProbDelid${problem.problem_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                            <EditProblem nonEditable={nonEditable} team_id={team_id} refreshProblems={refreshProblems} problem={problem}></EditProblem>
+                            {nonEditable ? <></> : <button className = "btn3 float-right" data-toggle="modal" data-target={`#ProbDelid${problem.problem_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>}
                           </div>
                         </li>
                       )}

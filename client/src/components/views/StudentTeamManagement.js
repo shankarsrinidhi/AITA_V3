@@ -1,11 +1,8 @@
 import React, { Fragment, useState, useEffect, useContext } from "react";
-import Header from "../views/Header";
-import Footer from "../views/Footer";
 import { useAuth } from "../../contexts/AuthContext"
 import { TeamContext } from '../../contexts/TeamContext';
-import { useParams } from 'react-router-dom';
 import { IoIosAddCircleOutline } from "react-icons/io";
-import { Form, Button, Card, Alert, Container } from "react-bootstrap"
+import { Button, Card, Alert, Container } from "react-bootstrap"
 
 
 export default function StudentTeamManagement() {
@@ -31,12 +28,12 @@ const filterStyle = {
     marginBottom: '12px',
   
 }
-  const [shouldRender, setShouldRender] = useState(false);
+
 
   
 
-  const { currentUser, logout } = useAuth()
-  const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
+  const { currentUser } = useAuth()
+  const { setTeams } = useContext(TeamContext);
   const [error, setError] = useState("");
   const getTeams = async e => {
     try {
@@ -70,17 +67,11 @@ const filterStyle = {
   },[]);
 
 
-// Simulating a delay before rendering the component
-setTimeout(() => {
-  setShouldRender(true);
-}, 500);
 
-  const { team_id } = useParams();
-  
-  const [welcome, setWelcome] = useState(true);
-  const [courseList, setCourseList] = useState([]);
  
   const [teamsList, setTeamsList] = useState([]);
+  const [requestedTeamsList, setRequestedTeamsList] = useState([]);
+  const [ledTeamsList, setLedTeamsList] = useState([]);
 
   const getTeamsList = async () => {
     try {
@@ -104,37 +95,112 @@ setTimeout(() => {
     }
   };
 
+  const getRequestedTeamsList = async () => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/course/requestedTeams`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+      
+      const jsonData = await response.json();
+      setRequestedTeamsList(jsonData);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const getLedTeamsList = async () => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/course/ledTeams`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+      
+      const jsonData = await response.json();
+      setLedTeamsList(jsonData);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   
 
   useEffect(() => {
     getTeamsList();
+    getLedTeamsList();
+    getRequestedTeamsList();
   }, []);
 
-  const [selectedOption, setSelectedOption] = useState('');
-  const [showTeams, setShowTeams] = useState(false);
-  const [showError, setShowError] = useState(false);
 
-  const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value);
-  };
+  const requestToJoinTeam = async (team_id) => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/${team_id}/requestToJoin`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (response.ok) {
+          const jsonData = await response.json();
+          getRequestedTeamsList();
+          getTeamsList();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
 
-  const handleCloseError = () => setShowError(false);
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
 
-  const handleShowError = () => setShowError(true);
+  const cancelRequest = async (team_id) => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/${team_id}/cancelRequest`,
+        {
+          method: "PUT",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (response.ok) {
+          const jsonData = await response.json();
+          getRequestedTeamsList();
+          getTeamsList();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
 
-  const [selectedOptionCourse, setSelectedOptionCourse] = useState('');
-
-  const handleOptionChangeCourse = (event) => {
-    setSelectedOptionCourse(event.target.value);
-  };
-
-  const continueToNextScreen = (event) => {
-    if (selectedOption === "" || (selectedOption === "student" && selectedOptionCourse === "")){
-      handleShowError();
-      return;
-     }
-    setShowTeams(true);
-  };
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
 
 
   function filterFunction() {
@@ -181,11 +247,7 @@ setTimeout(() => {
       <div className="w-100" style={{ maxWidth: "800px" }}>
         <Card>
           <Card.Body>
-            
             {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={()=>{}}>
-             
-              <Form.Group id="members">
                 <input type="text" id="myInput" onKeyUp={() => filterFunction()} placeholder="Search with team names" style={filterStyle}/>
                  
                     <table id="myUL" className="table mt-3">
@@ -195,7 +257,7 @@ setTimeout(() => {
                         <th scope="row">{index+1}</th>
                         <td>{team.team_name}</td>
                         <td>
-                            <Button className="btn-success float-right">Request to join</Button>
+                            <Button className="btn-success float-right" onClick={() => {requestToJoinTeam(team.team_id)}}>Request to join</Button>
                         </td>
                         </tr>
                       ))}
@@ -203,16 +265,50 @@ setTimeout(() => {
                         
                     </tbody>
                     </table>
-                
-             
-           
-               </Form.Group>
-             
-            </Form>
-            
           </Card.Body>
-         
         </Card>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <h4 style={{color:'#8F0000', fontFamily: 'Lato'}} className="text-center">Teams Requested to Join</h4>
+        <Card className=" mt-4">
+          <Card.Body>
+        <table id="requestedTeams" className="table mt-3">
+                    <tbody>
+                      {requestedTeamsList?.map((team, index) => (
+                        <tr>
+                        <th scope="row">{index+1}</th>
+                        <td>{team.team_name}</td>
+                        <td>
+                            <Button className="btn-warning float-right" onClick = {() => cancelRequest(team.team_id)}>Cancel Request</Button>
+                        </td>
+                        </tr>
+                      ))}
+                      {requestedTeamsList.length >0 ? <></> : <>No Data to show</>}
+                        
+                    </tbody>
+                    </table>
+                    </Card.Body>
+                    </Card>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <h4 style={{color:'#8F0000', fontFamily: 'Lato'}} className="text-center">Teams lead by you</h4>
+        <Card className=" mt-4">
+          <Card.Body>
+                <table id="LedTeams" className="table mt-3">
+                    <tbody>
+                      {ledTeamsList?.map((team, index) => (
+                        <tr>
+                        <th scope="row">{index+1}</th>
+                        <td>{team.team_name}</td>
+                        <td>
+                            <Button className="btn float-right" style={{backgroundColor:'gray'}} onClick = {() => window.location = `/editTeam/${team.team_id}`}>Edit Team</Button>
+                        </td>
+                        </tr>
+                      ))}
+                      {ledTeamsList.length >0 ? <></> : <>No Data to show</>}
+                    </tbody>
+                </table>
+            </Card.Body>
+         </Card>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
       </div>
     </Container>
 </div></>

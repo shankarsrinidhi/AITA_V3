@@ -27,21 +27,24 @@ const filterStyle = {
   
 }
 
-
   const { currentUser, logout } = useAuth();
   const [error, setError] = useState("");
   const [courseList, setCourseList] = useState([]);
+  const [requestedCourseList, setRequestedCourseList] = useState([]);
+  const [ledCoursesList, setLedCoursesList] = useState([]);
 
 
   const getCourseList = async () => {
     try {
       const idToken = localStorage.getItem('firebaseIdToken');
       const email =  currentUser.email;
+      const body = { email };
       const response = await fetch(
-        `http://localhost:5000/courses`,
+        `http://localhost:5000/unrequestedCourses`,
         {
-          method: "GET",
-          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" }
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body : JSON.stringify(body)
         });
 
       const jsonData = await response.json();
@@ -52,10 +55,110 @@ const filterStyle = {
     }
   };
 
+  const getRequestedCourseList = async () => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/requestedCourses`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+      
+      const jsonData = await response.json();
+      setRequestedCourseList(jsonData);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const getLedCoursesList = async () => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/ledCourses`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+      
+      const jsonData = await response.json();
+      setLedCoursesList(jsonData);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
 
   useEffect(() => {
     getCourseList();
+    getLedCoursesList();
+    getRequestedCourseList();
   }, []);
+
+  const requestToJoinCourse = async (course_id) => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/${course_id}/requestToJoinCourse`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (response.ok) {
+          const jsonData = await response.json();
+          getRequestedCourseList();
+          getCourseList();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
+
+  const cancelRequest = async (course_id) => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const email =  currentUser.email;
+      const body = { email };
+      const response = await fetch(
+        `http://localhost:5000/${course_id}/cancelRequestCourse`,
+        {
+          method: "PUT",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (response.ok) {
+          const jsonData = await response.json();
+          getRequestedCourseList();
+          getCourseList();
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
 
   function filterFunction() {
     // Declare variables
@@ -112,7 +215,7 @@ const filterStyle = {
                         <th scope="row">{index+1}</th>
                         <td>{course.course_code} - {course.course_description}</td>
                         <td>
-                            <Button className="btn-success float-right">Request to join</Button>
+                            <Button className="btn-success float-right" onClick={() => {requestToJoinCourse(course.course_id)}}>Request to join</Button>
                         </td>
                         </tr>
                       ))}
@@ -124,6 +227,49 @@ const filterStyle = {
             </Form>
           </Card.Body>
         </Card>
+
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <h4 style={{color:'#8F0000', fontFamily: 'Lato'}} className="text-center">Courses Requested to Join</h4>
+        <Card className=" mt-4">
+          <Card.Body>
+              <table id="requestedTeams" className="table mt-3">
+                    <tbody>
+                      {requestedCourseList?.map((course, index) => (
+                        <tr>
+                        <th scope="row">{index+1}</th>
+                        <td>{course.course_code} - {course.course_description}</td>
+                        <td>
+                            <Button className="btn-warning float-right" onClick = {() => cancelRequest(course.course_id)}>Cancel Request</Button>
+                        </td>
+                        </tr>
+                      ))}
+                      {requestedCourseList.length >0 ? <></> : <>No Data to show</>}
+                    </tbody>
+              </table>
+          </Card.Body>
+        </Card>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+        <h4 style={{color:'#8F0000', fontFamily: 'Lato'}} className="text-center">Courses lead by you</h4>
+        <Card className=" mt-4">
+          <Card.Body>
+                <table id="LedTeams" className="table mt-3">
+                    <tbody>
+                      {ledCoursesList?.map((course, index) => (
+                        <tr>
+                        <th scope="row">{index+1}</th>
+                        <td>{course.course_code} - {course.course_description}</td>
+                        <td>
+                            <Button className="btn float-right" style={{backgroundColor:'gray'}} onClick = {() => {}}>Edit Course</Button>
+                        </td>
+                        </tr>
+                      ))}
+                      {ledCoursesList.length >0 ? <></> : <>No Data to show</>}
+                    </tbody>
+                </table>
+            </Card.Body>
+         </Card>
+        <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+
       </div>
     </Container>
 </div></> 

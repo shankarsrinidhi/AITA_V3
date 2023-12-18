@@ -5,7 +5,7 @@ import {AiOutlineDelete} from "react-icons/ai";
 import '../css_components/DraggableCardList.css';
 import EditNewAddedProgress from "./EditNewAddedProgress";
 
-function AdditionalCompletedTasks({ team_id, refreshAdditionalCompletedTasks, week_start, week_end}) {
+function AdditionalCompletedTasks({ nonEditable, team_id, refreshAdditionalCompletedTasks, week_start, week_end}) {
   const [progress, setProgress] = useState([]);
   const getProgress = async () => {
     try {
@@ -80,8 +80,8 @@ function AdditionalCompletedTasks({ team_id, refreshAdditionalCompletedTasks, we
                           <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                               <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                              <EditNewAddedProgress team_id={team_id} refreshAdditionalCompletedTasks={refreshAdditionalCompletedTasks} progress={progress}></EditNewAddedProgress>
-                              <button className = "btn3 float-right" data-toggle="modal" data-target={`#ACTDelid${progress.progress_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                              <EditNewAddedProgress nonEditable= {nonEditable} team_id={team_id} refreshAdditionalCompletedTasks={refreshAdditionalCompletedTasks} progress={progress}></EditNewAddedProgress>
+                              {nonEditable ? <></> : <button className = "btn3 float-right" data-toggle="modal" data-target={`#ACTDelid${progress.progress_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>}
                             </div>
                           </li>
                         )}

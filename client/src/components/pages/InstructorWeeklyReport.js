@@ -19,9 +19,12 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from "../../contexts/AuthContext"
 import { TeamContext } from '../../contexts/TeamContext';
   
-function WeeklyReport() {
+function InstructorWeeklyReport() {
+
     
-    const { week_start, team_id } = useParams();
+    const [courseTeams, setCourseTeams] = useState([]);
+    
+    const { week_start, course_id, team_id } = useParams();
     const [currentDate, setCurrentDate] = useState(new Date(week_start));
     const [started,setStarted] = useState(false);
     const [submitted,setSubmitted] = useState(false);
@@ -36,16 +39,44 @@ function WeeklyReport() {
     const [welcome, setWelcome] = useState(true);
     const {teams, setTeams,  selectedTeam, count} = useContext(TeamContext);
     const [shouldRender, setShouldRender] = useState(false);
+    const [viewTeam, setViewTeam] = useState(team_id === undefined ? "" : team_id);
 
     setTimeout(() => {
       setShouldRender(true);
     }, 500);
 
+
+    const getCourseTeams = async e => {
+        try {
+          const idToken = localStorage.getItem('firebaseIdToken');
+          const id =  currentUser.email;
+          const body = { id };
+          const response = await fetch(
+            `http://localhost:5000/courseteams/${course_id}`,
+            {
+              method: "GET",
+              headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" }
+              
+            }
+          );
+          if (response.ok) {
+            const jsonData = await response.json();
+            setCourseTeams(jsonData);
+          } else {
+            if(response.status === 403){
+              window.location = '/login';
+            }
+          }
+          
+    
+        } catch (err) {
+          console.error(err.message);
+        }
+      };
+
     const getTeams = async e => {
       try {
-        if (team_id === "default"){
-          return;
-        }
+        
         const id =  currentUser.email;
         const body = { id };
         const idToken = localStorage.getItem('firebaseIdToken');
@@ -72,6 +103,7 @@ function WeeklyReport() {
     
     useEffect(() => {
       getTeams();
+      getCourseTeams();
     },[]);
 
 
@@ -87,11 +119,12 @@ function WeeklyReport() {
 
     const getSubmitted = async (week_start,week_end) => {
       try {
-        if (team_id === "default"){
+        if (viewTeam === ''){
           return;
         }
+
         const idToken = localStorage.getItem('firebaseIdToken');
-        const response = await fetch(`http://localhost:5000/${team_id}/reportsubmitted/${week_start}/${week_end}`,
+        const response = await fetch(`http://localhost:5000/${viewTeam}/reportsubmitted/${week_start}/${week_end}`,
         {
             method: "GET",
             headers: { 'Authorization': `Bearer ${idToken}` },
@@ -111,16 +144,17 @@ function WeeklyReport() {
     };
 
     useEffect(() => {
-      getSubmitted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
+      //getSubmitted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
     }, []);
     
     const getStarted = async (week_start,week_end) => {
       try {
-        if (team_id === "default"){
+        if (viewTeam === ''){
           return;
         }
+        console.log("view team "+viewTeam);
         const idToken = localStorage.getItem('firebaseIdToken');
-        const response = await fetch(`http://localhost:5000/${team_id}/reportstarted/${week_start}/${week_end}`,
+        const response = await fetch(`http://localhost:5000/${viewTeam}/reportstarted/${week_start}/${week_end}`,
         {
           method: "GET",
           headers: { 'Authorization': `Bearer ${idToken}` },
@@ -140,13 +174,13 @@ function WeeklyReport() {
     };
   
     useEffect(() => {
-      getStarted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
+      //getStarted(formatDate(getWeekStartDate()),formatDate(getWeekEndDate()));
     }, []);
     
     const getPlans = async (week_start,week_end) => {
       try {
         const idToken = localStorage.getItem('firebaseIdToken');
-        const response = await fetch(`http://localhost:5000/${team_id}/report/${week_start}/${week_end}/plans`,
+        const response = await fetch(`http://localhost:5000/${viewTeam}/report/${week_start}/${week_end}/plans`,
         {
           method: "GET",
           headers: { 'Authorization': `Bearer ${idToken}` },
@@ -184,6 +218,14 @@ function WeeklyReport() {
     const refreshProblems = () => {
       setProblemsRefreshCount(problemsRefreshCount + 1);
     };
+
+    const refreshComponents = () => {
+        refreshAdditionalCompletedTasks();
+        refreshCompletedTasks();
+        refreshUncompletedTasks();
+        refreshPlans();
+        refreshProblems();
+      };
 
     const formatDate = (dateString) => {
       const date = new Date(dateString);
@@ -258,77 +300,30 @@ function WeeklyReport() {
       return date;
     };
 
-    const startReport = async () => {
-        try {
-           const week_start = formatDate(getWeekStartDate());
-           const week_end = formatDate(getWeekEndDate());
-           const idToken = localStorage.getItem('firebaseIdToken');
-           const response = await fetch(
-            `http://localhost:5000/${team_id}/startreport/${week_start}/${week_end}`,
-            {
-              method: "POST",
-              headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
-            }
-          );
-          if (response.ok) {
-            setStarted(true);
-          } else {
-            if(response.status === 403){
-              window.location = '/login';
-            }
-          }
-          
-        } catch (err) {
-          console.error(err.message);
-        }
-    };
+    const choseTeam = (event) =>{
+      setViewTeam(event.target.value);
+   
+    }
 
-    const submitReport = async (e) => {
-      e.preventDefault();
-      try {
-         const week_start = formatDate(getWeekStartDate());
-         const week_end = formatDate(getWeekEndDate());
-         const plans = await getPlans(week_start,week_end);
-         if (plans.length < 1){
-          handleShowError();
-          return;
-         }
-         else{
-          const idToken = localStorage.getItem('firebaseIdToken');
-          const response = await fetch(
-          `http://localhost:5000/${team_id}/submitreport/${week_start}/${week_end}`,
-          {
-            method: "PUT",
-            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
-            //body: JSON.stringify(body)
-          }
-        );
-        if (response.ok) {
-          setSubmitted(true);
-          handleShowSuccess();
-        } else {
-          if(response.status === 403){
-            window.location = '/login';
-          }
-        }
-        
-      }    
-    } catch (err) {
-        console.error(err.message);
-      }
-  };
+    useEffect(() => {
+      //console.log("view team " + viewTeam);
+      getSubmitted(formatDate(getWeekStartDate()), formatDate(getWeekEndDate()));
+      getStarted(formatDate(getWeekStartDate()), formatDate(getWeekEndDate()));
+      refreshComponents();
+    }, [viewTeam]);
 
+    
     
     return (
       <Fragment>
         {shouldRender? <div className='container'>
-          <Header team_id={ team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
+          <Header course_id={course_id}/>
           
         </div>: null}
         <div className='container'>
           <h4 className="text-center mt-3" style={{color:'#8F0000', fontFamily: 'Lato'}}>Submit Weekly Report</h4>
           <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-          {teams.length>0 ? (<> {shouldRender? <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <> {shouldRender? <div className='container' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button className = "btn1 float-left" onClick={handlePreviousWeek}><AiFillCaretLeft></AiFillCaretLeft>Prev</button>
             <h5 className="text-center mr-1 ml-1" style={{color:'#8F0000', fontFamily: 'Lato'}}>
               Week : {getWeekStartDate().toDateString()} - {getWeekEndDate().toDateString()}
@@ -336,56 +331,61 @@ function WeeklyReport() {
             <button className = "btn1 float-right" onClick={handleNextWeek}>Next<AiFillCaretRight></AiFillCaretRight></button>
           </div> : null}
           <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-          {started ? 
+          <h6>Select the Team whose report you want to view</h6>
+            <select class="form-select" aria-label="Default select example" value={viewTeam} onChange={ choseTeam } required>
+                    <option selected>Select option</option>
+                    {courseTeams.map(team => (
+                        <option value={team.team_id}>{team.team_name}</option>
+                    ))}
+            </select>
+            <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
+            {viewTeam === "" || viewTeam === "Select option" ? <></> :
+            
+          <>{started ? 
           (<div className='container'>
+            {submitted  ? (<></>):(
+                <h5 className="center mt-3">The selected team has not submitted this week's report but have started it.</h5>
+            )}
             <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Progress</h4>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Completed Planned Tasks</h6>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            {shouldRender? <div><CompletedPlannedTasks team_id={team_id} key={`CP${completedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
+            {shouldRender? <div><CompletedPlannedTasks nonEditable={true} team_id={viewTeam} key={`CPI${completedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} week_start = {formatDate(prevWeekStartDate())} week_end = {formatDate(prevWeekEndDate())}></CompletedPlannedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Uncompleted Planned Tasks</h6>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <UncompletedPlannedTasks team_id={team_id} key={`UP${uncompletedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} refreshProblems = {refreshProblems} prevweek_start = {formatDate(prevWeekStartDate())} prevweek_end = {formatDate(prevWeekEndDate())} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></UncompletedPlannedTasks>
+            <UncompletedPlannedTasks nonEditable={true} team_id={viewTeam} key={`UPI${uncompletedTasksRefreshCount}`} refreshCompletedTasks = {refreshCompletedTasks} refreshUncompletedTasks = {refreshUncompletedTasks} refreshProblems = {refreshProblems} prevweek_start = {formatDate(prevWeekStartDate())} prevweek_end = {formatDate(prevWeekEndDate())} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></UncompletedPlannedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h6 style={{color:"#8f0000", marginBottom:"1rem"}}>Additional Tasks Completed</h6>
-            <AddProgressRow team_id={team_id} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AddProgressRow>
+            
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <AdditionalCompletedTasks team_id={team_id} key={`AP${additionalTasksRefreshCount}`} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AdditionalCompletedTasks>
+            <AdditionalCompletedTasks nonEditable={true} team_id={viewTeam} key={`API${additionalTasksRefreshCount}`} refreshAdditionalCompletedTasks = {refreshAdditionalCompletedTasks}  week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></AdditionalCompletedTasks>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Plans</h4>
-              <AddPlan team_id={team_id} refreshPlans={refreshPlans} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddPlan>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <PlansList team_id={team_id} key={`PL${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>
+            <PlansList nonEditable={true} team_id={viewTeam} key={`PLI${plansRefreshCount}`} refreshPlans={refreshPlans} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></PlansList>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{color:'#8F0000', fontFamily: 'Lato'}}>Problems</h4>
-              <AddProblem team_id={team_id} refreshProblems={refreshProblems} week_start={formatDate(getWeekStartDate())} week_end={formatDate(getWeekEndDate())}></AddProblem>
             </div>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr>
-            <ProblemsList team_id={team_id} key={`PR${problemsRefreshCount}`} refreshProblems={refreshProblems} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></ProblemsList>
+            <ProblemsList nonEditable={true} team_id={viewTeam} key={`PRI${problemsRefreshCount}`} refreshProblems={refreshProblems} week_start = {formatDate(getWeekStartDate())} week_end = {formatDate(getWeekEndDate())}></ProblemsList>
             <hr style={{color: '#8f0000', width: '100%', margin: '20px auto'}}></hr></div>:null}
-              {submitted  ? (<br></br>):(
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <button style={{ borderRadius: '50px', padding: '10px 20px' , margin:'1rem'}} onClick={submitReport}>Submit this week's report</button>
-            </div>)}
+              
             </div>) : 
             (<>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <h5 className="center mt-3">You have not started this week's report.</h5>
+              <h5 className="center mt-3">The selected team has not started this week's report.</h5>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <button style={{ borderRadius: '50px', padding: '10px 20px' , margin:'3rem'}} onClick={startReport}>Start this week's report</button>
-            </div>
-            </>)}
-        </>) : (<h5 className="ml-3 text-center">Welcome! You are currently not added to any team. Please wait to be added or reach out to the admin</h5>)}
+            </>)}</>}
+        </> 
         </div>
         <div>
-          <Footer team_id={team_id !== 'default' ? team_id : (teams ? "default" : teams[0].team_id)}/>
+          <Footer course_id={course_id}/>
         </div>
         <Modal
           show={showSuccess}
@@ -427,4 +427,4 @@ function WeeklyReport() {
     );
   }
   
-  export default WeeklyReport;
+  export default InstructorWeeklyReport;

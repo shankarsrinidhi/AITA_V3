@@ -7,7 +7,7 @@ import '../css_components/DraggableCardList.css';
 import ReportProblem from "./ReportProblem";
 import EditUncompletedPlan from "./EditUncompletedPlan";
 
-function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompletedTasks, refreshProblems, week_start, week_end, prevweek_start, prevweek_end}) {
+function UncompletedPlannedTasks({nonEditable, team_id, refreshCompletedTasks, refreshUncompletedTasks, refreshProblems, week_start, week_end, prevweek_start, prevweek_end}) {
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
@@ -123,10 +123,10 @@ function UncompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompl
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditUncompletedPlan team_id={team_id} plan_id={plan_id} plan_title={plan_title} plan_description={description} student={student} related_objectives={related_objectives} refreshUncompletedTasks={refreshUncompletedTasks}></EditUncompletedPlan>
-                          <ReportProblem team_id={team_id} plan_id={plan_id} refreshProblems = {refreshProblems} week_start={week_start} week_end={week_end}></ReportProblem>
+                            <EditUncompletedPlan nonEditable={nonEditable} team_id={team_id} plan_id={plan_id} plan_title={plan_title} plan_description={description} student={student} related_objectives={related_objectives} refreshUncompletedTasks={refreshUncompletedTasks}></EditUncompletedPlan>
+                          {nonEditable ? <></> : <><ReportProblem team_id={team_id} plan_id={plan_id} refreshProblems = {refreshProblems} week_start={week_start} week_end={week_end}></ReportProblem>
                           <button className = "btn3 float-right" onClick={() => markAsComplete({plan_id,plan_title, description, student, related_objectives})}><AiOutlineCheckCircle style={{fontSize:'1.25rem'}}></AiOutlineCheckCircle></button>
-                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#UPDelid${plan_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button>
+                          <button className = "btn3 float-right" data-toggle="modal" data-target={`#UPDelid${plan_id}`}><AiOutlineDelete style={{fontSize:'1.25rem'}}></AiOutlineDelete></button></>}
                           </div>
                         </li>
                       )}

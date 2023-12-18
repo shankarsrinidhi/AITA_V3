@@ -5,7 +5,7 @@ import {AiFillCheckCircle} from "react-icons/ai";
 import '../css_components/DraggableCardList.css';
 import EditProgress from "./EditProgress";
 
-function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end}) {
+function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncompletedTasks, week_start, week_end, nonEditable}) {
   const [progress, setProgress] = useState([]);
 
   const getProgress = async () => {
@@ -86,8 +86,8 @@ function CompletedPlannedTasks({team_id, refreshCompletedTasks, refreshUncomplet
                         <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width:"100%" }}>
                             <RxDragHandleDots2 className="float-left mr-2"></RxDragHandleDots2>
-                            <EditProgress team_id={team_id} plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
-                            <button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>
+                            <EditProgress nonEditable={nonEditable} team_id={team_id} plan={plan} refreshCompletedTasks={refreshCompletedTasks}></EditProgress>
+                            {nonEditable? <></>:<button className = "btn3 float-right" onClick={() => markUncomplete({plan})}><AiFillCheckCircle style={{fontSize:'1.25rem'}}></AiFillCheckCircle></button>}
                           </div>
                         </li>
                       )}

@@ -5,7 +5,7 @@ import { GrClose } from "react-icons/gr";
 import axios from "axios"
 import React, { Fragment, useState, useEffect } from "react";
 
-const Mission = ({team_id}) =>{
+const Mission = ({nonEditable, team_id}) =>{
     const [mission, setMission] = useState("");
     const [initialMissionValue, setInitialMissionValue] = useState("");
     const [missionEditButtonVisible, setMissionEditButtonVisible] = useState(false);
@@ -81,10 +81,10 @@ return(
         />
         </form>
         <div>
-        {true &&
-          <button className="btn2 float-right ml-2 mt-1" visible ={false} disabled = {!missionEditButtonVisible} data-toggle="modal" data-target="#exampleModalCenter"><BiSave  style={{fontSize:'1.5rem'}}/></button>}
+        
+          {nonEditable ? <></> : <><button className="btn2 float-right ml-2 mt-1" visible ={false} disabled = {!missionEditButtonVisible} data-toggle="modal" data-target="#exampleModalCenter"><BiSave  style={{fontSize:'1.5rem'}}/></button>
           <button className="btn2 float-right ml-2 mt-1" disabled = {!missionEditButtonVisible} onClick={handleCancel}><GrClose style={{fontSize:'1rem'}}/></button>
-          <button className="btn2 float-right ml-2 mt-1" disabled = {missionEditButtonVisible} onClick={disableMissionEdit}><MdOutlineModeEditOutline style={{fontSize:'1.5rem'}}/></button>
+          <button className="btn2 float-right ml-2 mt-1" disabled = {missionEditButtonVisible} onClick={disableMissionEdit}><MdOutlineModeEditOutline style={{fontSize:'1.5rem'}}/></button></>}
         </div>
         </div>
         </div>

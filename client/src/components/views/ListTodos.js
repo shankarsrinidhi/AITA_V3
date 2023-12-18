@@ -6,7 +6,7 @@ import DeleteObjective from "./DeleteObjective";
 import EditKR from "./EditKR";
 import DeleteKR from "./DeleteKR";
 
-const ListTodos = ({team_id}) => {
+const ListTodos = ({nonEditable, team_id}) => {
   const [objectives, setObjectives] = useState([]);
   const [krShown, setKrShown] = useState([]);
 
@@ -90,12 +90,12 @@ const ListTodos = ({team_id}) => {
                 </button>
               </td>
               <td>{objective.objective.objective_title}</td>
-              <td className ="expand">
+              {nonEditable ? <></> : <><td className ="expand">
                 <EditObjective team_id={team_id} objective={objective} updateData = {updateData} ></EditObjective>
               </td>
               <td className ="expand">
                 <DeleteObjective team_id={team_id} objective={objective} updateData = {updateData} ></DeleteObjective>
-              </td>
+              </td></>}
             </tr>
               {krShown.includes(objective.objective.objective_id) && (
                 <tr>
@@ -104,7 +104,7 @@ const ListTodos = ({team_id}) => {
                     {objective.objective.description}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <h5 style={{color:"#8f0000", marginTop:"1.5rem"}}>Key Results</h5>
-                      <AddKR team_id={team_id} updateData={updateData} objective = {objective}></AddKR>
+                      {nonEditable ? <></> : <AddKR team_id={team_id} updateData={updateData} objective = {objective}></AddKR>}
                     </div>
                     <table className="table mt-3">
                       <tbody>
@@ -114,12 +114,12 @@ const ListTodos = ({team_id}) => {
                               <>
                                   <td className = "expand">{index+1}</td>
                                   <td style={{paddingLeft:"2rem"}}>{kr.key_result}</td>
-                                  <td className = "expand">
+                                  {nonEditable ? <></> : <><td className = "expand">
                                     <EditKR team_id={team_id} objective={objective} kr={kr} updateData={updateData}></EditKR>
                                   </td>
                                   <td className = "expand">
                                     <DeleteKR team_id={team_id} objective={objective} kr={kr} updateData={updateData}></DeleteKR>
-                                  </td>
+                                  </td></>}
                               </>):(
                                   <td colSpan="3">
                                     <h6 style={{ marginLeft:"1.5rem"}}>No Key Results added</h6>

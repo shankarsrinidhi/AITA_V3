@@ -80,11 +80,20 @@ setTimeout(() => {
       return;
      }
      try {
-        const email = currentUser.email;
-
-            const body = { email, selectedOption, selectedOptionCourse };
-
-        const idToken = localStorage.getItem('firebaseIdToken');
+        if (selectedOption === "instructor"){
+          const email = currentUser.email;
+          const idToken = localStorage.getItem('firebaseIdToken');
+          const instructorBody = { email }
+          const addInstructor = await fetch(
+              `http://localhost:5000/newInstructor`,
+              {
+                method: "POST",
+                headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+                body: JSON.stringify(instructorBody)
+              }
+            );
+  
+        const body = { email, selectedOption };
         const response = await fetch(
           `http://localhost:5000/newuser`,
           {
@@ -94,6 +103,7 @@ setTimeout(() => {
           }
         );
         if (response.ok) {
+            
           //const jsonData = await response.json();
             //console.log(jsonData);
             window.location = `/teammanagement/${selectedOption}`;
@@ -102,6 +112,33 @@ setTimeout(() => {
             window.location = '/login';
           }
         }
+
+      }
+      else if (selectedOption === "student"){
+        const email = currentUser.email;
+        const idToken = localStorage.getItem('firebaseIdToken');
+        const body = { email, selectedOption, selectedOptionCourse };
+        const response = await fetch(
+          `http://localhost:5000/newuser`,
+          {
+            method: "PUT",
+            headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          }
+        );
+        if (response.ok) {
+            
+          //const jsonData = await response.json();
+            //console.log(jsonData);
+            window.location = `/teammanagement/${selectedOption}`;
+        } else {
+          if(response.status === 403){
+            window.location = '/login';
+          }
+        }
+      }
+
+      
      
       
     } catch (err) {
@@ -172,7 +209,7 @@ setTimeout(() => {
       <select className="ml-3" value={selectedOptionCourse} onChange={handleOptionChangeCourse}>
         <option value="">Select an option</option>
         {courseList.map((course) => (
-          <option value={course.crn}>{course.course_code} - {course.course_description}</option>
+          <option value={course.course_id}>{course.course_code} - {course.course_description}</option>
         ))}
 
       </select>

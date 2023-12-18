@@ -1,20 +1,18 @@
 import React, { useState, useContext } from 'react';
 import { FaBars } from "react-icons/fa";
 import "../css_components/NavigationDropdown.css";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../contexts/AuthContext";
-import { TeamContext } from '../../contexts/TeamContext';
-//styles 
+import { CourseContext } from '../../contexts/CourseContext';
 
 
-
-const NavigationDropdown = ({team_id}) => {
+const InstructorNavigationDropdown = ({course_id}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const { currentUser, logout } = useAuth();
-  const {teams, setTeams, setSelectedTeam, selectedTeam, setCount, count} = useContext(TeamContext);
+  const { logout } = useAuth();
+  const {courses, setSelectedCourse } = useContext(CourseContext);
 
   setTimeout(() => {
     setShouldRender(true);
@@ -36,15 +34,13 @@ const NavigationDropdown = ({team_id}) => {
     }
   }
 
-  async function selectTeam(team){
-    await setSelectedTeam(team);
+  async function selectCourse(course){
+    await setSelectedCourse(course);
 
-    window.location = `/home/${team.team_id}`;
+    window.location = `/InstHome/${course.course_id}`;
 
   }
 
-  async function editTeam() {}
-  async function newTeam() {}
 
 
   return (
@@ -55,16 +51,16 @@ const NavigationDropdown = ({team_id}) => {
       {isOpen && shouldRender && (
         <div className="dropdown">
         <ul>
-        { teams?.length > 0 ?
-        <> <li>Switch to a different Team :</li>
+        { courses?.length > 0 ?
+        <> <li>Switch to a different Course :</li>
           <ul>
-              {teams?.map((team, index) =>(
-                  <li key= {index} className='li2' onClick={() => selectTeam(team)}>{team.team_name}</li>
+              {courses?.map((course, index) =>(
+                  <li key= {index} className='li2' onClick={() => selectCourse(course)}>{course.course_code} - {course.course_description}</li>
 
               ))}
           </ul>
-          <li onClick={() => {navigate(`/editTeam/${team_id}`)}}>Edit Team</li></> : <></>}
-          {team_id === undefined ? <></>:<> <li onClick={() => {navigate(`/newTeam/${team_id}`)}}>Create New Team</li></>}
+          <li onClick={() => {navigate(`/editCourse/${course_id}`)}}>Edit Course</li></> : <></>}
+          {course_id === undefined ? <></>:<> <li onClick={() => {navigate(`/newCourse/${course_id}`)}}>Create New Course</li></>}
           <li onClick={handleLogout}>Logout</li>
         </ul>
       </div>
@@ -74,4 +70,4 @@ const NavigationDropdown = ({team_id}) => {
   );
 };
 
-export default NavigationDropdown;
+export default InstructorNavigationDropdown;

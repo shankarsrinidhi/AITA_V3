@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, student, related_objectives, marked_complete, refreshUncompletedTasks, refreshHomeTasks }) => {
+const EditUncompletedPlan = ({ nonEditable, team_id, plan_id, plan_title, plan_description, student, related_objectives, marked_complete, refreshUncompletedTasks, refreshHomeTasks }) => {
   const [title, setTitle] = useState(plan_title);
   const [description, setDescription] = useState(plan_description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -193,7 +193,7 @@ const EditUncompletedPlan = ({ team_id, plan_id, plan_title, plan_description, s
                 />   
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit" class="btn btn1">Save</Button>
+          {nonEditable? <></> : <Button variant="primary" type="submit" class="btn btn1">Save</Button>}
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

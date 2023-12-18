@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-const EditProblem = ({ team_id, problem, refreshProblems }) => {
+const EditProblem = ({ nonEditable, team_id, problem, refreshProblems }) => {
   const [title, setTitle] = useState(problem.problem_title);
   const [description, setDescription] = useState(problem.description);
   const [mitigation, setMitigation] = useState(problem.mitigation);
@@ -87,7 +87,7 @@ const EditProblem = ({ team_id, problem, refreshProblems }) => {
                   />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit" class="btn btn1">Save</Button>
+        {nonEditable ? <></> : <Button variant="primary" type="submit" class="btn btn1">Save</Button>}
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

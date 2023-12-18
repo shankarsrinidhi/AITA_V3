@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import {Multiselect} from 'multiselect-react-dropdown';
 
-const EditNewAddedProgress = ({ team_id, progress, refreshAdditionalCompletedTasks }) => {
+const EditNewAddedProgress = ({ nonEditable, team_id, progress, refreshAdditionalCompletedTasks }) => {
   const [title, setTitle] = useState(progress.progress_title);
   const [description, setDescription] = useState(progress.description);
   const [studentOptions, setStudentOptions] = useState([]);
@@ -193,7 +193,7 @@ const EditNewAddedProgress = ({ team_id, progress, refreshAdditionalCompletedTas
           />   
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit" class="btn btn1">Save</Button>
+          {nonEditable? <></> : <Button variant="primary" type="submit" class="btn btn1">Save</Button>}
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

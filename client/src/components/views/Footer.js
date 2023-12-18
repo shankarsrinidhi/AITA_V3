@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import "../css_components/nav.css";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 
-const Footer = ({team_id}) => {
+const Footer = ({team_id, course_id}) => {
   
     function CustomLink({ to, children, ...props }) {
       
@@ -10,7 +10,7 @@ const Footer = ({team_id}) => {
         const isActive = useMatch({ path: resolvedPath.pathname, end: true });
         return (
           
-            <Link  to={team_id === undefined? "":to} className={isActive?"nav__link link-active":"nav__link"} {...props}>
+            <Link  to={team_id === undefined && course_id === undefined ? "":to} className={isActive?"nav__link link-active":"nav__link"} {...props}>
               {children}
             </Link>
               )
@@ -20,7 +20,19 @@ const Footer = ({team_id}) => {
       <Fragment>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
             <nav className="nav">
-            <CustomLink to={`/home/${team_id}`}>
+            {course_id ? <><CustomLink to={`/InstHome/${course_id}`}>
+                <i className="material-icons nav__icon">home</i>
+                <span className="nav__text">Dashboard</span>
+            </CustomLink>
+            <CustomLink to={`/InstWeeklyReport/${new Date()}/course/${course_id}`}>
+                <i className="material-icons nav__icon">add_circle</i>
+                <span className="nav__text">Weekly Report</span>
+            </CustomLink>
+            <CustomLink to={`/InstMOKR/${course_id}`}>
+                <i className="material-icons nav__icon">key</i>
+                <span className="nav__text">MOKR</span>
+            </CustomLink></> :
+            <><CustomLink to={`/home/${team_id}`}>
                 <i className="material-icons nav__icon">home</i>
                 <span className="nav__text">Dashboard</span>
             </CustomLink>
@@ -31,7 +43,7 @@ const Footer = ({team_id}) => {
             <CustomLink to={`/MOKR/${team_id}`}>
                 <i className="material-icons nav__icon">key</i>
                 <span className="nav__text">MOKR</span>
-            </CustomLink>
+            </CustomLink></> }
             </nav>
       </Fragment>
     );

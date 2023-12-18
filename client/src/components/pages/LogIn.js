@@ -7,6 +7,7 @@ import { Container } from "react-bootstrap"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import pamplinlogo from '../logo-images/pamplin.png';
 import { TeamContext } from '../../contexts/TeamContext';
+import { CourseContext } from "../../contexts/CourseContext";
 
 //Styling for the page
 const containerStyle = {
@@ -31,9 +32,11 @@ export default function LogIn() {
   const { login } = useAuth()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [userDetails, setUserDetails ] = useState([]);
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth()
   const {teams, setTeams} = useContext(TeamContext);
+  const {courses, setCourses } = useContext(CourseContext);
 
   
 
@@ -47,27 +50,153 @@ export default function LogIn() {
         const user = userCredential.user;
         // Access the ID token
          const idToken = user && await user.getIdToken();
-        //console.log(idToken);
         // Store the ID token in local storage or state
         localStorage.setItem('firebaseIdToken', idToken);
-      navigate("/home/default");
+
+      //navigate("/home/default");
     } catch {
       setError("Failed to log in")
     }
-    setLoading(false)
+    await getUserDetails();
+    setLoading(false);
   }
 
+  const getUserDetails = async e => {
+    try {
+
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const id = await currentUser?.email; 
+      if (!id) {
+        return;
+      }
+      const body = { id };
+      const response = await fetch(
+        `http://localhost:5000/fetchUserDetails`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+          
+        }
+      );
+      if (response.ok) {
+        const jsonData = await response.json();
+        console.log(jsonData[0]);
+        setUserDetails(jsonData);
+
+        if (jsonData[0].new) {
+          navigate("/newuser");
+        } else {
+          if (jsonData[0].type === "instructor") {
+            await getCourses();
+
+          } else if (jsonData[0].type === "student"){
+            await getTeams();
+           
+          }
+        }
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+      
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const getCourses = async e => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const id =  currentUser.email;
+      const body = { id };
+      const response = await fetch(
+        `http://localhost:5000/courses`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        }
+      );
+      if (response.ok) {
+        const jsonData = await response.json();
+        console.log(jsonData);
+        await setCourses(jsonData);
+        
+        console.log(courses);
+        if (jsonData?.length < 1){
+          navigate("/teammanagement/instructor");
+        }
+        else{
+          navigate(`/InstHome/${jsonData[0]?.course_id}`);
+
+        }
+
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const getTeams = async e => {
+    try {
+      const idToken = localStorage.getItem('firebaseIdToken');
+      const id =  currentUser.email;
+      const body = { id };
+      const response = await fetch(
+        `http://localhost:5000/teams`,
+        {
+          method: "POST",
+          headers: { 'Authorization': `Bearer ${idToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        }
+      );
+      if (response.ok) {
+        const jsonData = await response.json();
+        console.log(jsonData);
+        await setTeams(jsonData);
+        
+        console.log(courses);
+        if (jsonData?.length < 1){
+          navigate("/teammanagement/student");
+        }
+        else{
+          navigate(`/home/${jsonData[0]?.team_id}`);
+
+        }
+
+      } else {
+        if(response.status === 403){
+          window.location = '/login';
+        }
+      }
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   return (
+    
     <>
+    <head><link href="client/src/assets/fontawesome-free-6.4.0-web/css/solid.css" rel="stylesheet"/></head>
       <div style={containerStyle}>
+      
         <div style={{width:'100%', backgroundColor:"white"}}>
-          <header>
-              <head><link href="client/src/assets/fontawesome-free-6.4.0-web/css/solid.css" rel="stylesheet"/></head>
+          
+              
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width:'100%' }}>
               <img className= "mt-2 align-center" src={pamplinlogo} style={pamplin} /> 
               <br></br>
               </div>
-          </header>
+          
         </div>
         <Container
           className="d-flex align-items-center justify-content-center"
