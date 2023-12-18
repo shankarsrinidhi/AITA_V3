@@ -5,33 +5,28 @@ import PrivateRoutes from "./routes/PrivateRoutes";
 
 //components
 import { Route, Routes } from "react-router-dom";
-import MOKR from "./components/pages/MOKR";
-import InstructorMOKR from "./components/pages/InstructorMOKR";
-import WeeklyReport from "./components/pages/WeeklyReport";
-import InstructorWeeklyReport from "./components/pages/InstructorWeeklyReport";
-import  Home  from "./components/pages/Home";
-import SignUp from "./components/pages/SignUp";
-import LogIn from "./components/pages/LogIn";
+import MOKR from "./components/pages/StudentPortal/MOKR";
+import InstructorMOKR from "./components/pages/InstructorPortal/InstructorMOKR";
+import WeeklyReport from "./components/pages/StudentPortal/WeeklyReport";
+import InstructorWeeklyReport from "./components/pages/InstructorPortal/InstructorWeeklyReport";
+import  Home  from "./components/pages/StudentPortal/Home";
+import SignUp from "./components/pages/CommonPages/SignUp";
+import LogIn from "./components/pages/CommonPages/LogIn";
 
 import { AuthProvider } from "./contexts/AuthContext";
-import ForgotPassword from "./components/pages/ForgotPassword";
+import ForgotPassword from "./components/pages/CommonPages/ForgotPassword";
 import { TeamProvider } from "./contexts/TeamContext";
 import { CourseProvider } from "./contexts/CourseContext";
-import NewTeam from "./components/pages/NewTeam";
-import EditTeam from "./components/pages/EditTeam";
-import TeamManagement from "./components/pages/TeamManagement";
-import NewUser from "./components/pages/NewUser";
-import NewCourse from "./components/pages/NewCourse";
-import EditCourse from "./components/pages/EditCourse";
-import InstructorHome from "./components/pages/InstructorHome";
+import NewTeam from "./components/pages/StudentPortal/NewTeam";
+import EditTeam from "./components/pages/StudentPortal/EditTeam";
+import TeamManagement from "./components/pages/CommonPages/TeamManagement";
+import NewUser from "./components/pages/CommonPages/NewUser";
+import NewCourse from "./components/pages/InstructorPortal/NewCourse";
+import EditCourse from "./components/pages/InstructorPortal/EditCourse";
+import InstructorHome from "./components/pages/InstructorPortal/InstructorHome";
 
 
 function App() {
-
- 
-
-  
-
 
   return (
     <AuthProvider>

@@ -8,88 +8,6 @@ app.use(cors());
 app.use(express.json());
 const authenticateFirebaseToken = require('./middleware/firebase');
 
-var session = require('express-session');
-var CASAuthentication = require('cas-authentication');
-
-app.use( session({
-    secret            : 'super secret key',
-    resave            : false,
-    saveUninitialized : true
-}));
-
-// Create a new instance of CASAuthentication.
-var cas = new CASAuthentication({
-    cas_url     : 'https://casserver.herokuapp.com/cas',
-    service_url : 'https://4405-2607-b400-2-ef40-00-1040.ngrok-free.app'
-});
-
-
-app.get('/protected-route', authenticateFirebaseToken, (req, res) => {
-    // This route is protected and can only be accessed with a valid Firebase token
-    // You can access the authenticated user's information using `req.user`
-    res.json({ message: 'Access granted! You are authorized to access this route.' });
-  });
-
-
-// Unauthenticated clients will be redirected to the CAS login and then back to
-// this route once authenticated.
-app.get( '/app', function ( req, res ) {
-    res.send( '<html><body>App Home - No Login Needed!<br>Go to <a href="' + 'https://4405-2607-b400-2-ef40-00-1040.ngrok-free.app/' + 'authenticate?returnTo=' + 'http://localhost:3000/MOKR' + '">login</a>.</body></html>' );
-});
-
-
-
-// Unauthenticated clients will be redirected to the CAS login and then back to
-// this route once authenticated.
-app.get( '/app1', cas.bounce, function ( req, res ) {
-   // res.send( '<html><body>Hello!</body></html>' );
-    res.redirect('http://localhost:3000/MOKR');
-});
-
-app.get( '/', cas.bounce, function ( req, res ) {
-    // res.send( '<html><body>Hello!</body></html>' );
-     res.redirect('http://localhost:3000/login');
- });
-
- app.get('/api/data', cas.bounce, (req, res) => {
-    // Retrieve authenticated user information
-    const user = req.session[cas.session_info];
-    res.json({ user });
-  });
-
-// Unauthenticated clients will receive a 401 Unauthorized response instead of
-// the JSON data.
-app.get( '/api', cas.block, function ( req, res ) {
-    res.json( { success: true } );
-});
-
-// An example of accessing the CAS user session variable. This could be used to
-// retrieve your own local user records based on authenticated CAS username.
-app.get( '/api/user', cas.block, function ( req, res ) {
-    res.json( { cas_user: req.session[ cas.session_name ] } );
-});
-
-// Unauthenticated clients will be redirected to the CAS login and then to the
-// provided "redirectTo" query parameter once authenticated.
-app.get( '/authenticate', cas.bounce_redirect );
-
-// This route will de-authenticate the client with the Express server and then
-// redirect the client to the CAS logout page.
-app.get( '/logout', cas.logout );
-
-const isAuthenticated = (req, res, next) => {
-    if (req.session && req.session.cas_user) {
-      // User is authenticated
-      next();
-    } else {
-      // User is not authenticated
-      res.sendStatus(401);
-      //res.redirect('http://localhost:3000/login') // Unauthorized status
-    }
-  };
-
-
-
 //routes 
 
 //post routes
@@ -202,7 +120,6 @@ app.post("/newTeam", authenticateFirebaseToken, async(req,res)=>{
 app.post("/newCourse", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { crn, courseCode, courseTitle, courseModality, selectedInstructorOptions, email } = req.body;
-        //console.log(req.body);
         const newCourse = await pool.query("INSERT INTO course(crn, course_code, course_description, modality, lead_instructor) VALUES($1,$2,$3,$4,$5) RETURNING course_id",[crn, courseCode, courseTitle, courseModality, email]);
         const check = newCourse.rows[0].course_id;
         const addInstructors = await pool.query(" SELECT insert_instructors_to_courses($1, $2)",[selectedInstructorOptions,check]);
@@ -230,7 +147,6 @@ app.post("/:team_id/requestToJoin", authenticateFirebaseToken, async(req,res)=>{
         const { email } = req.body;
         const {team_id} = req.params;
         const addRequest =  await pool.query("INSERT INTO team_requests(requestor_email, team_id, status) VALUES ($1, $2, 'pending')",[email, team_id]);
-       //console.log(courseTeams.rows);
         res.json("Inserted");
     } catch (err) {
         console.error(err.message);
@@ -256,10 +172,8 @@ app.post("/:course_id/requestToJoinCourse", authenticateFirebaseToken, async(req
 //Get team ids for a given user
 app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
     try {
-       // console.log(req.body);
         const { id } = req.body;
         const teams =  await pool.query("SELECT team_name, team_id FROM team WHERE team_id IN (SELECT team_id FROM users s JOIN student_teams st ON s.email = st.email WHERE s.email = $1 GROUP BY st.team_id) ORDER BY team_id",[id]);
-       // console.log(teams.rows);
         res.json(teams.rows);
     } catch (err) {
         console.error("in this /teams "+err.message);
@@ -270,10 +184,8 @@ app.post("/teams", authenticateFirebaseToken, async(req,res)=>{
 //Get course ids for a given instructor
 app.post("/courses", authenticateFirebaseToken, async(req,res)=>{
     try {
-       // console.log(req.body);
         const { id } = req.body;
         const courses =  await pool.query("SELECT course_description, course_id, course_code FROM course WHERE course_id IN (SELECT ic.course_id FROM instructor i JOIN instructor_courses ic ON i.instructor_email = ic.instructor_email WHERE i.instructor_email = $1 GROUP BY ic.course_id) ORDER BY course_id",[id]);
-       // console.log(teams.rows);
         res.json(courses.rows);
     } catch (err) {
         console.error("in this /courses "+err.message);
@@ -282,10 +194,8 @@ app.post("/courses", authenticateFirebaseToken, async(req,res)=>{
 
 app.get("/courseteams/:course_id", authenticateFirebaseToken, async(req,res)=>{
     try {
-       // console.log(req.body);
         const { course_id } = req.params;
         const teams =  await pool.query("SELECT * FROM team WHERE course_id = $1",[course_id]);
-       // console.log(teams.rows);
         res.json(teams.rows);
     } catch (err) {
         console.error("in this /courseteams "+err.message);
@@ -293,10 +203,8 @@ app.get("/courseteams/:course_id", authenticateFirebaseToken, async(req,res)=>{
 });
 
 //Get current team details
-//SELECT  t.team_id, t.team_name, t.industry, jsonb_agg(jsonb_build_object('email', st.email,'full_name', concat(s.first_name,' ', s.last_name))) AS students FROM team t JOIN student_teams st ON t.team_id = st.team_id JOIN student s ON st.email = s.email WHERE t.team_id = 1 GROUP BY t.team_id;
 app.get("/teamdetails/:id",  async(req,res)=>{
     try {
-        //console.log(req.params);
         const { id } = req.params;
         const teams =  await pool.query("SELECT  t.team_id, t.team_name, t.industry, jsonb_agg(jsonb_build_object('email', st.email, 'isInstructor', s.isInstructor, 'full_name', concat(s.first_name,' ', s.last_name))) AS students FROM team t LEFT JOIN student_teams st ON t.team_id = st.team_id LEFT JOIN users s ON st.email = s.email WHERE t.team_id = $1 GROUP BY t.team_id",[id]);
         res.json(teams.rows);
@@ -308,7 +216,6 @@ app.get("/teamdetails/:id",  async(req,res)=>{
 //Get course details to display on the edit course page
 app.get("/coursedetails/:id",  async(req,res)=>{
     try {
-        console.log(req.params);
         const { id } = req.params;
         const teams =  await pool.query("SELECT  c.course_id, c.crn, c.course_code, c.course_description, c.modality, jsonb_agg(jsonb_build_object('email', ic.instructor_email, 'full_name', concat(i.first_name,' ', i.last_name))) AS instructors FROM course c LEFT JOIN instructor_courses ic ON c.course_id = ic.course_id LEFT JOIN instructor i ON ic.instructor_email = i.instructor_email WHERE c.course_id = $1 GROUP BY c.course_id",[id]);
         res.json(teams.rows);
@@ -671,7 +578,6 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
         try {
             const { email } = req.body;
             const courseTeams =  await pool.query("SELECT * FROM team WHERE team_lead != $1 OR team_lead IS NULL AND course_id IN (SELECT course_id FROM course_students WHERE email = $1) AND team_id NOT IN (SELECT team_id FROM team_requests WHERE requestor_email = $1 AND (status = 'pending' OR status = 'accepted'))",[email]);
-           //console.log(courseTeams.rows);
             res.json(courseTeams.rows);
         } catch (err) {
             console.error(err.message);
@@ -683,7 +589,6 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
         try {
             const { email } = req.body;
             const courseTeams =  await pool.query("SELECT * FROM team WHERE team_id IN (SELECT team_id FROM team_requests WHERE requestor_email = $1 AND status = 'pending' )",[email]);
-           //console.log(courseTeams.rows);
             res.json(courseTeams.rows);
         } catch (err) {
             console.error(err.message);
@@ -720,7 +625,6 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
         try {
             const { email } = req.body;
             const courseTeams =  await pool.query("SELECT * FROM team WHERE team_lead = $1 AND course_id IN (SELECT course_id FROM course_students WHERE email = $1)",[email]);
-           //console.log(courseTeams.rows);
             res.json(courseTeams.rows);
         } catch (err) {
             console.error(err.message);
@@ -745,7 +649,6 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
         try {
             const { team_id } = req.params;
             const requests =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, u.email, tr.request_id FROM users u JOIN team_requests tr ON u.email = tr.requestor_email WHERE tr.team_id = $1 AND tr.status = 'pending'",[team_id]);
-            console.log(requests.rows);
             res.json(requests.rows);
         } catch (err) {
             console.error(err.message);
@@ -757,7 +660,6 @@ app.get("/:team_id/report/:start_date/:end_date/problems", authenticateFirebaseT
         try {
             const { course_id } = req.params;
             const requests =  await pool.query("SELECT CONCAT(first_name, ' ', last_name) AS full_name, u.email, tr.request_id FROM instructor u JOIN course_requests tr ON u.email = tr.requestor_email WHERE tr.course_id = $1 AND tr.status = 'pending'",[course_id]);
-            console.log(requests.rows);
             res.json(requests.rows);
         } catch (err) {
             console.error(err.message);
@@ -931,7 +833,6 @@ app.put("/editTeam/:team_id", authenticateFirebaseToken, async(req,res)=>{
         const {team_id} = req.params;
         const { name, industry, selectedStudentOptions } = req.body;
         const newTeam = await pool.query("UPDATE team SET team_name = $1, industry = $2 WHERE team_id=$3",[name, industry,team_id]);
-      // console.log(selectedStudentOptions);
         const addStudents = await pool.query(" SELECT insert_students_to_teams($1, $2)",[selectedStudentOptions,team_id]);
         res.json("updated");
     } catch (err) {
@@ -944,7 +845,6 @@ app.put("/newuser", authenticateFirebaseToken, async(req,res)=>{
     try {
         const { email, selectedOption, selectedOptionCourse } = req.body;
         const newUser = await pool.query("UPDATE users SET new = false, type = $1, course_id = $2 WHERE email =$3",[selectedOption, selectedOptionCourse, email]);
-       
         res.json("updated");
     } catch (err) {
         console.error(err.message);
@@ -957,7 +857,6 @@ app.put("/:team_id/cancelRequest", authenticateFirebaseToken, async(req,res)=>{
         const { email} = req.body;
         const {team_id} = req.params;
         const newUser = await pool.query("UPDATE team_requests SET status = 'cancelled' WHERE requestor_email =$1 AND team_id = $2",[email, team_id]);
-       
         res.json("updated");
     } catch (err) {
         console.error(err.message);
