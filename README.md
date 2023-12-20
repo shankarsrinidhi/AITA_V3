@@ -7,3 +7,4 @@ To run the web app -
 4. Start server by running 'nodemon index'
 5. Change directory to client and install dependencies by running 'npm i'
 6. Start client React app by running 'npm start'
+7. Navigate to '/login'
